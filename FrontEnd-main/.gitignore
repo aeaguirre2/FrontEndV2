@@ -1,0 +1,195 @@
+# ================================
+# DEPENDENCIES
+# ================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ================================
+# PRODUCTION BUILDS
+# ================================
+dist/
+build/
+*.tgz
+
+# ================================
+# ENVIRONMENT FILES
+# ================================
+# Incluir solo .env.example, excluir configuraciones específicas
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ================================
+# LOGS Y DEBUGGING
+# ================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ================================
+# CACHE Y ARCHIVOS TEMPORALES
+# ================================
+.cache/
+.parcel-cache/
+.npm/
+.eslintcache
+*.tsbuildinfo
+.yarn-integrity
+
+# Archivos temporales del sistema
+tmp/
+temp/
+*.tmp
+*.temp
+
+# ================================
+# ARCHIVOS DEL SISTEMA OPERATIVO
+# ================================
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+.nfs*
+
+# ================================
+# EDITORES E IDEs
+# ================================
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+
+# ================================
+# COVERAGE Y TESTING
+# ================================
+coverage/
+.nyc_output/
+.coverage
+*.lcov
+
+# Jest
+jest-coverage/
+
+# ================================
+# DOCKER
+# ================================
+.dockerignore
+
+# ================================
+# ARCHIVOS DE PROCESO
+# ================================
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# ================================
+# ARCHIVOS DE CERTIFICADOS Y KEYS
+# ================================
+*.pem
+*.key
+*.crt
+*.csr
+
+# ================================
+# OTROS FRAMEWORKS Y HERRAMIENTAS
+# ================================
+# ESLint
+.eslintcache
+
+# Stylelint
+.stylelintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# ================================
+# IGNORAR CARPETAS ESPECÍFICAS DEL PROYECTO
+# ================================
+# Excluir otras carpetas del directorio padre que no son parte del frontend
+../AnalsisNube/
+../Parametros/
+../PrestamosAutomotrices.rar
+../PrestamosAutomotricesOld/
+../PrestamosAutomotrices_SinReglas/
+../Proyecto-Analisis/
+../Proyecto-AnalisisRiesgos/
+../Proyecto-Parametros-V1-GIT/
+../Proyecto-Parametros/
+../Proyecto_2P/
+
+# ================================
+# ARCHIVOS QUE SÍ INCLUIR (comentarios informativos)
+# ================================
+# ✅ package.json - configuración de dependencias
+# ✅ package-lock.json - lock de versiones exactas
+# ✅ tsconfig.json - configuración TypeScript
+# ✅ vite.config.ts - configuración de Vite
+# ✅ tailwind.config.js - configuración Tailwind
+# ✅ postcss.config.js - configuración PostCSS
+# ✅ eslint.config.js - configuración ESLint
+# ✅ .env.example - ejemplo de variables de entorno
+# ✅ .gitignore - este archivo
+# ✅ README.md - documentación
+# ✅ src/ - código fuente completo
+# ✅ public/ - archivos estáticos
+# ✅ index.html - archivo principal HTML
+# ✅ deploy.sh - script de deploy
+# ✅ Dockerfile - configuración Docker
+# ✅ amplify.yml - configuración AWS Amplify
+# ✅ nginx.conf - configuración Nginx

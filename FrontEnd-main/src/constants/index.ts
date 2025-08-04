@@ -15,7 +15,7 @@ export const MICROSERVICES = {
   
   // Core Services
   GENERAL: import.meta.env.VITE_GENERAL_SERVICE_URL || 'http://localhost:8080',
-  CLIENTES: import.meta.env.VITE_CLIENTES_SERVICE_URL || 'http://localhost:8080',
+  CLIENTES: import.meta.env.VITE_CLIENTES_SERVICE_URL || 'http://3.145.79.87:8088',
   CUENTAS_CONFIG: import.meta.env.VITE_CUENTAS_CONFIG_SERVICE_URL || 'http://localhost:8080',
   CUENTAS_TRANS: import.meta.env.VITE_CUENTAS_TRANS_SERVICE_URL || 'http://localhost:8080',
   TRANSACCIONES: import.meta.env.VITE_TRANSACCIONES_SERVICE_URL || 'http://localhost:8080',

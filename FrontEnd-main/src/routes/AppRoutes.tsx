@@ -26,6 +26,8 @@ import CreditSimulationPage from '../pages/simulation/CreditSimulationPage';
 
 // Loans
 import LoansPage from '../pages/loans/LoansPage';
+import CreateLoanPage from '../pages/loans/CreateLoanPage';
+import SimulationPage from '../pages/loans/SimulationPage';
 
 // Analysis
 import AnalysisPage from '../pages/analysis/AnalysisPage';
@@ -142,6 +144,26 @@ const AppRoutes: React.FC = () => {
           <ProtectedRoute>
             <AppLayout>
               <LoansPage />
+            </AppLayout>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/loans/create" 
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <CreateLoanPage />
+            </AppLayout>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/loans/simulate/:numeroSolicitud" 
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <SimulationPage />
             </AppLayout>
           </ProtectedRoute>
         } 

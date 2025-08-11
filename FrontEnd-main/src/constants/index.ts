@@ -58,6 +58,7 @@ export const ROUTES = {
   LOANS: '/loans',
   ANALYSIS: '/analysis',
   CONTRACTS: '/contracts',
+  DOCUMENTATION: '/documentation',
   SETTINGS: '/settings',
   NOT_FOUND: '/404',
   CONCESIONARIOS: '/concesionarios',

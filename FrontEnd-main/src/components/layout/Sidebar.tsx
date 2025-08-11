@@ -19,7 +19,7 @@ const Sidebar: React.FC<{ isCollapsed: boolean; onToggle: () => void }> = ({ isC
   // Definir elementos del sidebar según el rol
   const getSidebarItems = (): SidebarItem[] => {
     const isAdmin = user?.rol === 'ADMIN';
-    
+
     const baseItems: SidebarItem[] = [
       {
         label: 'Dashboard',
@@ -100,6 +100,14 @@ const Sidebar: React.FC<{ isCollapsed: boolean; onToggle: () => void }> = ({ isC
           icon: '📑',
           roles: ['ADMIN'],
         },
+        {
+          label: 'Documentación',
+          href: '/documentation',
+          icon: '📂',
+          roles: ['ADMIN', 'VENDEDOR']
+        },
+
+
       ];
     } else {
       // Elementos para VENDEDOR
@@ -135,6 +143,7 @@ const Sidebar: React.FC<{ isCollapsed: boolean; onToggle: () => void }> = ({ isC
           icon: '📑',
           roles: ['VENDEDOR'],
         },
+
       ];
     }
   };

@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../components/ui/Button';
-import { clientService, type ClienteInfo } from '../../services/clientService';
+
 import { prestamoService, type Prestamo } from '../../services/prestamoService';
 import { getConcesionariosByEstado, getVehiculosByRuc, getVendedoresByRuc } from '../../services/concesionarioService';
+import { riesgoCreditoService, type ConsultaBuroCreditoResponse } from '../../services/riesgoCreditoService';
+import { originacionService, type CrearSolicitudRequestDTO } from '../../services/originacionService';
 import type { VehiculoEnConcesionario } from '../../types/automotive-loan';
+import { useToast } from '../../hooks/useToast';
+import { useAuth } from '../../contexts/AuthContext';
 
 // Iconos
 const PersonIcon = () => (
@@ -39,8 +43,122 @@ const SearchIcon = () => (
 
 const CreateLoanPage: React.FC = () => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
+  const { user } = useAuth();
+
+  // Función para obtener el color de la calificación de riesgo
+  const getCalificacionColor = (calificacion: string) => {
+    switch (calificacion?.toUpperCase()) {
+      case 'A+':
+      case 'A':
+      case 'A-':
+        return 'bg-green-500 text-white';
+      case 'B+':
+      case 'B':
+      case 'B-':
+        return 'bg-green-400 text-white';
+      case 'C+':
+      case 'C':
+      case 'C-':
+        return 'bg-yellow-500 text-white';
+      case 'D+':
+      case 'D':
+      case 'D-':
+        return 'bg-orange-500 text-white';
+      case 'E+':
+      case 'E':
+      case 'E-':
+        return 'bg-red-500 text-white';
+      default:
+        return 'bg-gray-500 text-white';
+    }
+  };
+
+  const getCalificacionText = (calificacion: string) => {
+    switch (calificacion?.toUpperCase()) {
+      case 'A+':
+      case 'A':
+      case 'A-':
+        return 'Riesgo Muy Bajo';
+      case 'B+':
+      case 'B':
+      case 'B-':
+        return 'Riesgo Bajo';
+      case 'C+':
+      case 'C':
+      case 'C-':
+        return 'Riesgo Medio';
+      case 'D+':
+      case 'D':
+      case 'D-':
+        return 'Riesgo Alto';
+      case 'E+':
+      case 'E':
+      case 'E-':
+        return 'Riesgo Muy Alto';
+      default:
+        return 'Sin Calificación';
+    }
+  };
+
+  const getRiesgoPercentage = (calificacion: string) => {
+    switch (calificacion?.toUpperCase()) {
+      case 'A+': return 5;
+      case 'A': return 10;
+      case 'A-': return 15;
+      case 'B+': return 25;
+      case 'B': return 30;
+      case 'B-': return 35;
+      case 'C+': return 45;
+      case 'C': return 50;
+      case 'C-': return 55;
+      case 'D+': return 65;
+      case 'D': return 70;
+      case 'D-': return 75;
+      case 'E+': return 85;
+      case 'E': return 90;
+      case 'E-': return 95;
+      default: return 0;
+    }
+  };
+
+  const getRiesgoBarColor = (calificacion: string) => {
+    switch (calificacion?.toUpperCase()) {
+      case 'A+':
+      case 'A':
+      case 'A-':
+        return 'bg-green-500';
+      case 'B+':
+      case 'B':
+      case 'B-':
+        return 'bg-green-400';
+      case 'C+':
+      case 'C':
+      case 'C-':
+        return 'bg-yellow-500';
+      case 'D+':
+      case 'D':
+      case 'D-':
+        return 'bg-orange-500';
+      case 'E+':
+      case 'E':
+      case 'E-':
+        return 'bg-red-500';
+      default:
+        return 'bg-gray-500';
+    }
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('es-EC', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
   const [formData, setFormData] = useState({
-    cedula: '',
+    cedula: '0101515151',
     nombres: '',
     direccion: '',
     capacidadPago: '',
@@ -58,9 +176,15 @@ const CreateLoanPage: React.FC = () => {
     plazoMeses: '12'
   });
 
-  const [clienteInfo, setClienteInfo] = useState<ClienteInfo | null>(null);
-  const [loadingCliente, setLoadingCliente] = useState(false);
-  const [errorCliente, setErrorCliente] = useState<string | null>(null);
+  // Estados para riesgo crediticio
+  const [riesgoCrediticio, setRiesgoCrediticio] = useState<ConsultaBuroCreditoResponse | null>(null);
+  const [loadingRiesgo, setLoadingRiesgo] = useState(false);
+  const [errorRiesgo, setErrorRiesgo] = useState<string | null>(null);
+
+  // Estados para información del vendedor logueado
+  const [vendedorInfo, setVendedorInfo] = useState<any>(null);
+  const [concesionarioInfo, setConcesionarioInfo] = useState<any>(null);
+  const [loadingVendedorInfo, setLoadingVendedorInfo] = useState(false);
 
   // Estados para préstamos
   const [prestamos, setPrestamos] = useState<Prestamo[]>([]);
@@ -72,7 +196,6 @@ const CreateLoanPage: React.FC = () => {
   const [loadingVehiculos, setLoadingVehiculos] = useState(false);
   const [errorVehiculos, setErrorVehiculos] = useState<string | null>(null);
   const [concesionarios, setConcesionarios] = useState<{ ruc: string; razonSocial: string }[]>([]);
-  const [concesionarioSeleccionado, setConcesionarioSeleccionado] = useState<string>('');
   const [loadingVehiculosConcesionario, setLoadingVehiculosConcesionario] = useState(false);
   const [vehiculoDetallado, setVehiculoDetallado] = useState<VehiculoEnConcesionario | null>(null);
   const [plazosDisponibles, setPlazosDisponibles] = useState<number[]>([]);
@@ -83,6 +206,48 @@ const CreateLoanPage: React.FC = () => {
   const [loadingVendedores, setLoadingVendedores] = useState(false);
   const [errorVendedores, setErrorVendedores] = useState<string | null>(null);
 
+  // Estados para el modal de resultado
+  const [modalResultadoAbierto, setModalResultadoAbierto] = useState(false);
+  const [resultadoSolicitud, setResultadoSolicitud] = useState<{
+    exito: boolean;
+    titulo: string;
+    mensaje: string;
+    numeroSolicitud?: string;
+    detalles?: any;
+  } | null>(null);
+
+  // Función para cerrar modal y redirigir
+  const cerrarModalYRedirigir = () => {
+    setModalResultadoAbierto(false);
+    // Mostrar toast de redirección
+    mostrarNotificacionInline('Redirigiendo a la página de solicitudes...', 'info');
+    // Pequeño delay para que la animación del modal se complete antes de redirigir
+    setTimeout(() => {
+      navigate('/loans');
+    }, 300);
+  };
+
+  // Manejar tecla ESC para cerrar modal
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && modalResultadoAbierto) {
+        cerrarModalYRedirigir();
+      }
+    };
+
+    if (modalResultadoAbierto) {
+      document.addEventListener('keydown', handleEscapeKey);
+      return () => {
+        document.removeEventListener('keydown', handleEscapeKey);
+      };
+    }
+  }, [modalResultadoAbierto]);
+
+  // Función helper para mostrar notificaciones inline
+  const mostrarNotificacionInline = (mensaje: string, tipo: 'success' | 'error' | 'warning' | 'info' = 'info') => {
+    showToast(mensaje, tipo);
+  };
+
   // Debug: Monitorear cambios en vehiculoDetallado
   useEffect(() => {
     console.log('Estado de vehiculoDetallado cambió:', vehiculoDetallado);
@@ -90,14 +255,19 @@ const CreateLoanPage: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+
+    // Si es vendedor logueado, no permitir cambios en concesionario o vendedor
+    if (user?.rol === 'VENDEDOR' && (name === 'concesionario' || name === 'vendedor')) {
+      return;
+    }
+
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
 
-    // Si se selecciona un concesionario, cargar sus vehículos
-    if (name === 'concesionario' && value) {
-      setConcesionarioSeleccionado(value);
+    // Si se selecciona un concesionario, cargar sus vehículos (solo para admin)
+    if (name === 'concesionario' && value && user?.rol !== 'VENDEDOR') {
       cargarVehiculosPorConcesionario(value);
       cargarVendedoresPorConcesionario(value);
       // Limpiar vehículo seleccionado cuando cambia el concesionario
@@ -123,6 +293,9 @@ const CreateLoanPage: React.FC = () => {
         // Guardar la información completa del vehículo
         setVehiculoDetallado(vehiculoSeleccionado);
         console.log('Vehículo detallado guardado:', vehiculoSeleccionado);
+        
+        // Notificar al usuario sobre la selección
+        mostrarNotificacionInline(`Vehículo ${vehiculoSeleccionado.marca} ${vehiculoSeleccionado.modelo} seleccionado`, 'success');
         
         // Actualizar el valor del vehículo si está disponible
         const valorVehiculo = vehiculoSeleccionado.valor;
@@ -235,6 +408,9 @@ const CreateLoanPage: React.FC = () => {
         // Limpiar entrada sugerida al seleccionar nuevo préstamo
         setEntradaSugerida(null);
         
+        // Notificar al usuario sobre la selección
+        mostrarNotificacionInline(`Préstamo "${prestamo.nombre}" seleccionado`, 'success');
+        
         console.log('Préstamo seleccionado:', prestamo);
         console.log('Valor de entrada por defecto:', valorEntradaPorDefecto);
       }
@@ -262,47 +438,7 @@ const CreateLoanPage: React.FC = () => {
     return Math.max(0, entradaPorDefecto);
   };
 
-  // Función para calcular y validar el monto solicitado según los rangos del préstamo
-  const calcularYValidarMontoSolicitado = (prestamo: any) => {
-    const valorVehiculo = parseFloat(formData.valorVehiculo) || 0;
-    const valorEntrada = parseFloat(formData.valorEntrada) || 0;
-    
-    // Calcular monto solicitado
-    const montoSolicitado = valorVehiculo - valorEntrada;
-    
-    console.log('Cálculo actual:', {
-      valorVehiculo,
-      valorEntrada,
-      montoSolicitado,
-      montoMinimo: prestamo.montoMinimo,
-      montoMaximo: prestamo.montoMaximo
-    });
-    
-    // Validar que esté dentro de los rangos del préstamo
-    let montoFinal = montoSolicitado;
-    let entradaFinal = valorEntrada;
-    
-    if (montoSolicitado < prestamo.montoMinimo) {
-      // Si es menor al mínimo, ajustar la entrada para que llegue al mínimo
-      entradaFinal = valorVehiculo - prestamo.montoMinimo;
-      montoFinal = prestamo.montoMinimo;
-      
-      console.log('Ajustando a mínimo:', { entradaFinal, montoFinal });
-    } else if (montoSolicitado > prestamo.montoMaximo) {
-      // Si es mayor al máximo, ajustar la entrada para que llegue al máximo
-      entradaFinal = valorVehiculo - prestamo.montoMaximo;
-      montoFinal = prestamo.montoMaximo;
-      
-      console.log('Ajustando a máximo:', { entradaFinal, montoFinal });
-    }
-    
-    // Actualizar el formulario
-    setFormData(prev => ({
-      ...prev,
-      valorEntrada: Math.max(0, entradaFinal).toString(),
-      montoSolicitado: montoFinal.toString()
-    }));
-  };
+
 
   // Función para cargar vendedores por concesionario
   const cargarVendedoresPorConcesionario = async (rucConcesionario: string) => {
@@ -333,14 +469,21 @@ const CreateLoanPage: React.FC = () => {
       formData.capacidadPago,
       formData.calificacionBuro,
       formData.tipoCredito,
-      formData.concesionario,
-      formData.vendedor,
       formData.placaVehiculo,
       formData.valorEntrada,
       formData.plazoMeses
     ];
-    
-    return camposRequeridos.every(campo => campo && campo.trim() !== '');
+
+    // Para vendedores, verificar que tengan información del vendedor cargada
+    if (user?.rol === 'VENDEDOR') {
+      // Verificar que la información del vendedor esté cargada y el formulario actualizado
+      return camposRequeridos.every(campo => campo && campo.trim() !== '') && 
+             vendedorInfo && concesionarioInfo && formData.concesionario;
+    } else {
+      // Para admin, también validar que haya seleccionado concesionario y vendedor
+      camposRequeridos.push(formData.concesionario, formData.vendedor);
+      return camposRequeridos.every(campo => campo && campo.trim() !== '');
+    }
   };
 
   // Función para calcular el monto mensual de la cuota
@@ -411,11 +554,68 @@ const CreateLoanPage: React.FC = () => {
     return montoSolicitado >= montoMinimo && montoSolicitado <= montoMaximo;
   };
 
-  // Cargar préstamos al montar el componente
+  // Cargar información del vendedor logueado usando los endpoints específicos
+  const cargarInfoVendedor = async () => {
+    if (!user?.email) {
+      console.log('Usuario no tiene email:', user);
+      return;
+    }
+
+    setLoadingVendedorInfo(true);
+    try {
+      console.log('🔄 Cargando información del vendedor con email:', user.email);
+      
+      // Paso 1: Obtener información del concesionario usando el email del vendedor
+      const concesionarioResponse = await fetch(`http://localhost:8080/api/concesionarios/v1/vendedor-email/${user.email}`);
+      
+      if (!concesionarioResponse.ok) {
+        throw new Error(`Error al obtener concesionario: ${concesionarioResponse.statusText}`);
+      }
+      
+      const concesionarioData = await concesionarioResponse.json();
+      console.log('✅ Información del concesionario obtenida:', concesionarioData);
+      setConcesionarioInfo(concesionarioData);
+      
+      // Paso 2: Obtener información del vendedor usando RUC y email
+      const vendedorResponse = await fetch(`http://localhost:8080/api/concesionarios/v1/ruc/${concesionarioData.ruc}/vendedores/email/${encodeURIComponent(user.email)}`);
+      
+      if (!vendedorResponse.ok) {
+        throw new Error(`Error al obtener vendedor: ${vendedorResponse.statusText}`);
+      }
+      
+      const vendedorData = await vendedorResponse.json();
+      console.log('✅ Información del vendedor obtenida:', vendedorData);
+      setVendedorInfo(vendedorData);
+      
+      // Paso 3: Actualizar el formulario con la información del vendedor
+      setFormData(prev => ({
+        ...prev,
+        concesionario: concesionarioData.ruc,
+        vendedor: vendedorData.id || vendedorData.cedula // Usar el ID o cédula según disponible
+      }));
+      
+      // Paso 4: Cargar vehículos del concesionario automáticamente
+      console.log('🚗 Cargando vehículos para RUC:', concesionarioData.ruc);
+      cargarVehiculosPorConcesionario(concesionarioData.ruc);
+      
+    } catch (error) {
+      console.error('❌ Error al cargar información del vendedor:', error);
+      setErrorVehiculos(`Error al cargar información del vendedor: ${error.message}`);
+    } finally {
+      setLoadingVendedorInfo(false);
+    }
+  };
+
+  // Cargar préstamos y información del vendedor al montar el componente
   useEffect(() => {
     cargarPrestamos();
-    cargarVehiculos();
-  }, []);
+    if (user?.rol === 'VENDEDOR' && user?.email) {
+      cargarInfoVendedor();
+    } else if (user?.rol !== 'VENDEDOR') {
+      // Si es admin, cargar concesionarios
+      cargarConcesionarios();
+    }
+  }, [user]);
 
   const cargarPrestamos = async () => {
     setLoadingPrestamos(true);
@@ -423,9 +623,8 @@ const CreateLoanPage: React.FC = () => {
 
     try {
       const prestamosData = await prestamoService.obtenerPrestamosActivos();
-      // Filtrar solo préstamos activos
-      const prestamosActivos = prestamosData.filter(prestamo => prestamo.estado === 'ACTIVO');
-      setPrestamos(prestamosActivos);
+      // Usar todos los préstamos (asumir que la API ya devuelve solo activos)
+      setPrestamos(prestamosData);
     } catch (err: any) {
       console.error('Error al cargar préstamos:', err);
       setErrorPrestamos('Error al cargar los tipos de préstamo disponibles');
@@ -434,12 +633,12 @@ const CreateLoanPage: React.FC = () => {
     }
   };
 
-  const cargarVehiculos = async () => {
+  const cargarConcesionarios = async () => {
     setLoadingVehiculos(true);
     setErrorVehiculos(null);
 
     try {
-      // Obtener concesionarios activos
+      // Obtener concesionarios activos (solo para admin)
       const concesionariosData = await getConcesionariosByEstado('ACTIVO');
       setConcesionarios(concesionariosData.map((c: any) => ({ ruc: c.ruc, razonSocial: c.razonSocial })));
       
@@ -482,67 +681,89 @@ const CreateLoanPage: React.FC = () => {
     }
   };
 
-  const consultarCliente = async () => {
+  const consultarRiesgoCrediticio = async () => {
     if (!formData.cedula.trim()) {
-      setErrorCliente('Por favor, ingrese una cédula');
+      setErrorRiesgo('Por favor, ingrese una cédula');
+      showToast('Por favor, ingrese una cédula antes de consultar', 'warning');
       return;
     }
 
-    setLoadingCliente(true);
-    setErrorCliente(null);
-    setClienteInfo(null);
+    setLoadingRiesgo(true);
+    setErrorRiesgo(null);
+    setRiesgoCrediticio(null);
 
     try {
-      const cliente = await clientService.consultarClientePorCedula(formData.cedula);
-      setClienteInfo(cliente);
+      console.log('🔄 Consultando riesgo crediticio para cédula:', formData.cedula);
+      const resultado = await riesgoCreditoService.consultarPorCedula(formData.cedula);
+      console.log('✅ Resultado de riesgo crediticio:', resultado);
       
-      // Actualizar el formulario con la información del cliente
+      setRiesgoCrediticio(resultado);
+      
+      // Actualizar el formulario con la información real del cliente
       setFormData(prev => ({
         ...prev,
-        nombres: cliente.nombre,
-        direccion: `${cliente.correoElectronico}` // Temporal, usar correo como dirección
+        nombres: resultado.nombreCliente,
+        capacidadPago: resultado.capacidadPago.toString(),
+        calificacionBuro: resultado.calificacionRiesgo,
+        direccion: `Cliente: ${resultado.nombreCliente}` // Temporal
       }));
       
+      showToast('Consulta realizada exitosamente', 'success');
+      
     } catch (err: any) {
-      console.error('Error al consultar cliente:', err);
-      setErrorCliente('No se encontró información para esta cédula. Verifique e intente nuevamente.');
+      console.error('❌ Error al consultar riesgo crediticio:', err);
+      const mensaje = err.response?.data || 'Error al consultar el riesgo crediticio. Verifique la cédula e intente nuevamente.';
+      setErrorRiesgo(mensaje);
+      showToast(mensaje, 'error');
     } finally {
-      setLoadingCliente(false);
+      setLoadingRiesgo(false);
     }
   };
 
-  const calcularMontoSolicitado = () => {
-    const valorVehiculo = parseFloat(formData.valorVehiculo.replace(/\./g, ''));
-    const valorEntrada = parseFloat(formData.valorEntrada.replace(/\./g, ''));
-    return (valorVehiculo - valorEntrada).toLocaleString('es-CO');
-  };
 
-  const formatCurrency = (value: string) => {
-    return `$ ${value}`;
-  };
+
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validarCamposRequeridos()) {
-      alert('Por favor complete todos los campos requeridos antes de crear la solicitud.');
+      showToast('Por favor complete todos los campos requeridos antes de crear la solicitud', 'warning');
       return;
     }
     
-    if (!validarCapacidadPago() || !prestamoSeleccionado) {
-      alert('No se puede crear la solicitud. Verifique la capacidad de pago y que haya seleccionado un tipo de crédito.');
+    if (!validarCapacidadPago()) {
+      showToast('La capacidad de pago no es suficiente para la cuota mensual calculada', 'error');
+      return;
+    }
+    
+    if (!prestamoSeleccionado) {
+      showToast('Por favor seleccione un tipo de crédito antes de continuar', 'warning');
+      return;
+    }
+    
+    if (!validarMontoSolicitado()) {
+      showToast('El monto solicitado está fuera del rango permitido para este tipo de préstamo', 'error');
       return;
     }
 
     setCreandoSolicitud(true);
+    showToast('Procesando solicitud de crédito...', 'info');
 
     try {
-      // Obtener la cédula del vendedor seleccionado
-      const vendedorSeleccionado = vendedores.find(v => v.id === formData.vendedor);
-      const cedulaVendedor = vendedorSeleccionado ? vendedorSeleccionado.cedula : "";
+      // Obtener la cédula del vendedor
+      let cedulaVendedor = "";
+      if (user?.rol === 'VENDEDOR' && vendedorInfo) {
+        // Si es vendedor logueado, usar su cédula
+        cedulaVendedor = vendedorInfo.cedula;
+      } else {
+        // Si es admin, obtener del vendedor seleccionado
+        const vendedorSeleccionado = vendedores.find(v => v.id === formData.vendedor);
+        cedulaVendedor = vendedorSeleccionado ? vendedorSeleccionado.cedula : "";
+      }
 
       // Preparar los datos de la solicitud según la estructura requerida
-      const solicitudData = {
+      const solicitudData: CrearSolicitudRequestDTO = {
         cedulaSolicitante: formData.cedula,
         idPrestamo: prestamoSeleccionado.id,
         placaVehiculo: formData.placaVehiculo,
@@ -556,32 +777,49 @@ const CreateLoanPage: React.FC = () => {
 
       console.log('Enviando solicitud:', solicitudData);
 
-      // Enviar la solicitud al endpoint
-      const response = await fetch('http://localhost:8080/api/v1/solicitudes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(solicitudData)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Error al crear la solicitud: ${errorData.message || response.statusText}`);
-      }
-
-      const result = await response.json();
+      // Enviar la solicitud usando el servicio de originación
+      const result = await originacionService.crearSolicitud(solicitudData);
       console.log('Solicitud creada exitosamente:', result);
       
-      // Mostrar mensaje de éxito
-      alert('Solicitud de crédito creada exitosamente');
+      // Mostrar toast de éxito primero
+      showToast('¡Solicitud creada exitosamente!', 'success');
       
-      // Redirigir a la página de préstamos
-      navigate('/loans');
+      // Mostrar modal de éxito
+      setResultadoSolicitud({
+        exito: true,
+        titulo: '¡Solicitud Creada Exitosamente!',
+        mensaje: 'Su solicitud de crédito automotriz ha sido procesada correctamente.',
+        numeroSolicitud: result.numeroSolicitud || 'N/A',
+        detalles: {
+          cliente: riesgoCrediticio?.nombreCliente || formData.nombres,
+          monto: (parseFloat(formData.valorVehiculo) || 0) - (parseFloat(formData.valorEntrada) || 0),
+          plazo: formData.plazoMeses,
+          vehiculo: vehiculoDetallado ? `${vehiculoDetallado.marca} ${vehiculoDetallado.modelo} - ${vehiculoDetallado.placa}` : 'N/A'
+        }
+      });
+      setModalResultadoAbierto(true);
       
     } catch (error: any) {
       console.error('Error al crear la solicitud:', error);
-      alert(`Error al crear la solicitud: ${error.message}`);
+      
+      // Extraer mensaje de error más específico
+      let mensajeError = 'Ha ocurrido un error inesperado al procesar su solicitud.';
+      if (error?.response?.data?.mensaje) {
+        mensajeError = error.response.data.mensaje;
+      } else if (error?.message) {
+        mensajeError = error.message;
+      }
+      
+      setResultadoSolicitud({
+        exito: false,
+        titulo: 'Error al Crear Solicitud',
+        mensaje: mensajeError,
+        detalles: {
+          codigo: error?.response?.status || 'N/A',
+          timestamp: new Date().toLocaleString('es-CO')
+        }
+      });
+      setModalResultadoAbierto(true);
     } finally {
       setCreandoSolicitud(false);
     }
@@ -625,8 +863,8 @@ const CreateLoanPage: React.FC = () => {
                   />
                 </div>
                 <Button
-                  onClick={consultarCliente}
-                  loading={loadingCliente}
+                  onClick={consultarRiesgoCrediticio}
+                  loading={loadingRiesgo}
                   className="bg-blue-600 hover:bg-blue-700 text-white flex items-center space-x-2"
                 >
                   <SearchIcon />
@@ -634,105 +872,96 @@ const CreateLoanPage: React.FC = () => {
                 </Button>
               </div>
               
-              {errorCliente && (
+              {errorRiesgo && (
                 <div className="mt-2 text-sm text-red-600 bg-red-50 p-2 rounded">
-                  {errorCliente}
+                  {errorRiesgo}
                 </div>
               )}
             </div>
 
-            {/* Información del cliente */}
-            {clienteInfo && (
-              <div className="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
-                <h3 className="text-lg font-medium text-green-800 mb-3">✓ Información del Cliente Encontrada</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <span className="text-sm text-gray-600">ID Cliente:</span>
-                    <p className="font-medium text-sm">{clienteInfo.id}</p>
+            {/* Información del riesgo crediticio */}
+            {riesgoCrediticio && (
+              <div className="mb-6 bg-white rounded-lg shadow-lg p-6">
+                <h3 className="text-lg font-medium text-green-800 mb-6 text-center">✓ Información del Cliente Encontrada</h3>
+                
+                {/* Calificación de Riesgo */}
+                <div className="text-center mb-6">
+                  <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-4">
+                    Calificación de Riesgo
+                  </h4>
+                  <div className="space-y-3">
+                    <div className={`inline-flex items-center justify-center w-24 h-24 rounded-xl shadow-lg ${getCalificacionColor(riesgoCrediticio.calificacionRiesgo)}`}>
+                      <span className="text-white text-3xl font-bold">
+                        {riesgoCrediticio.calificacionRiesgo}
+                      </span>
+                    </div>
+                    <div className="text-sm font-medium text-gray-700">
+                      {getCalificacionText(riesgoCrediticio.calificacionRiesgo)}
+                    </div>
+                    
+                    {/* Barra de progreso de riesgo */}
+                    <div className="mt-4">
+                      <div className="flex justify-between text-xs text-gray-500 mb-1">
+                        <span>Bajo Riesgo</span>
+                        <span>Alto Riesgo</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className={`h-2 rounded-full transition-all duration-500 ${getRiesgoBarColor(riesgoCrediticio.calificacionRiesgo)}`}
+                          style={{ width: `${getRiesgoPercentage(riesgoCrediticio.calificacionRiesgo)}%` }}
+                        ></div>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1 text-center">
+                        {getRiesgoPercentage(riesgoCrediticio.calificacionRiesgo)}% de riesgo
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-sm text-gray-600">Estado:</span>
-                    <p className="font-medium text-sm">{clienteInfo.estado}</p>
+                </div>
+
+                {/* Capacidad de Pago */}
+                <div className="text-center mb-6">
+                  <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">
+                    Capacidad de Pago
+                  </h4>
+                  <div className="text-3xl font-bold text-green-600">
+                    ${riesgoCrediticio.capacidadPago.toLocaleString()}
                   </div>
-                  <div>
-                    <span className="text-sm text-gray-600">Género:</span>
-                    <p className="font-medium text-sm">{clienteInfo.genero}</p>
+                </div>
+
+                {/* Información Box */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                  <div className="flex items-start space-x-3">
+                    <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div className="text-sm text-gray-700">
+                      <p className="font-medium mb-1">Capacidad de pago:</p>
+                      <p>
+                        Se refiere al máximo que una persona puede pagar un crédito, 
+                        generalmente hasta el 30% de la diferencia entre ingresos y egresos mensuales.
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-sm text-gray-600">Fecha de Nacimiento:</span>
-                    <p className="font-medium text-sm">{clienteInfo.fechaNacimiento}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm text-gray-600">Estado Civil:</span>
-                    <p className="font-medium text-sm">{clienteInfo.estadoCivil}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm text-gray-600">Nivel de Estudio:</span>
-                    <p className="font-medium text-sm">{clienteInfo.nivelEstudio}</p>
+                </div>
+
+                {/* Información del Cliente */}
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="font-medium text-gray-800 mb-2">Información del Cliente</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-600">Nombre:</span>
+                      <p className="font-medium">{riesgoCrediticio.nombreCliente}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Cédula:</span>
+                      <p className="font-medium">{riesgoCrediticio.cedulaCliente}</p>
+                    </div>
                   </div>
                 </div>
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Cédula</label>
-                <input
-                  type="text"
-                  name="cedula"
-                  value={formData.cedula}
-                  onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-50"
-                  readOnly
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nombres</label>
-                <input
-                  type="text"
-                  name="nombres"
-                  value={formData.nombres}
-                  onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-50"
-                  readOnly
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
-                <input
-                  type="text"
-                  name="direccion"
-                  value={formData.direccion}
-                  onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-50"
-                  readOnly
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Capacidad de Pago</label>
-                <input
-                  type="text"
-                  name="capacidadPago"
-                  value={formData.capacidadPago}
-                  onChange={handleInputChange}
-                  placeholder="Ingrese capacidad de pago"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Calificación Buró</label>
-                <select
-                  name="calificacionBuro"
-                  value={formData.calificacionBuro}
-                  onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">Seleccionar calificación</option>
-                  <option value="A+">A+</option>
-                  <option value="A-">A-</option>
-                </select>
-              </div>
-            </div>
+
           </div>
 
           {/* Tipo de Crédito */}
@@ -820,12 +1049,8 @@ const CreateLoanPage: React.FC = () => {
                             <p className="font-medium text-sm">{prestamoSeleccionado.plazoMaximoMeses} meses</p>
                           </div>
                           <div>
-                            <span className="text-sm text-gray-600">Tipo de Amortización:</span>
-                            <p className="font-medium text-sm">{prestamoSeleccionado.tipoAmortizacion}</p>
-                          </div>
-                          <div>
-                            <span className="text-sm text-gray-600">Moneda:</span>
-                            <p className="font-medium text-sm">{prestamoSeleccionado.idMoneda}</p>
+                            <span className="text-sm text-gray-600">Estado:</span>
+                            <p className="font-medium text-sm">Activo</p>
                           </div>
                         </div>
                       );
@@ -858,76 +1083,109 @@ const CreateLoanPage: React.FC = () => {
             {errorVehiculos && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
                 <p className="text-sm text-red-600">{errorVehiculos}</p>
-                <Button
-                  onClick={cargarVehiculos}
-                  className="mt-2 text-sm bg-red-600 hover:bg-red-700 text-white"
-                >
+                                 <Button
+                   onClick={cargarConcesionarios}
+                   className="mt-2 text-sm bg-red-600 hover:bg-red-700 text-white"
+                 >
                   Reintentar
                 </Button>
               </div>
             )}
 
-            {!loadingVehiculos && !errorVehiculos && (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Seleccionar Concesionario</label>
-                  <select
-                    name="concesionario"
-                    value={formData.concesionario}
-                    onChange={handleInputChange}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Seleccione un concesionario</option>
-                    {concesionarios.map((concesionario) => (
-                      <option key={concesionario.ruc} value={concesionario.ruc}>
-                        {concesionario.razonSocial} - {concesionario.ruc}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                         {!loadingVehiculos && !errorVehiculos && (
+               <div className="space-y-4">
+                 {/* Solo mostrar selectores si es ADMIN */}
+                 {user?.rol !== 'VENDEDOR' && (
+                   <>
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-1">Seleccionar Concesionario</label>
+                       <select
+                         name="concesionario"
+                         value={formData.concesionario}
+                         onChange={handleInputChange}
+                         className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                       >
+                         <option value="">Seleccione un concesionario</option>
+                         {concesionarios.map((concesionario) => (
+                           <option key={concesionario.ruc} value={concesionario.ruc}>
+                             {concesionario.razonSocial} - {concesionario.ruc}
+                           </option>
+                         ))}
+                       </select>
+                     </div>
 
-                {/* Selector de Vendedor */}
-                {formData.concesionario && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Seleccionar Vendedor</label>
-                    {loadingVendedores ? (
-                      <div className="text-center py-4">
-                        <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600"></div>
-                        <p className="text-sm text-gray-600 mt-2">Cargando vendedores del concesionario...</p>
-                      </div>
-                    ) : (
-                      <select
-                        name="vendedor"
-                        value={formData.vendedor}
-                        onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        <option value="">Seleccione un vendedor</option>
-                        {vendedores.map((vendedor) => (
-                          <option key={vendedor.id} value={vendedor.id}>
-                            {vendedor.nombre} - {vendedor.cedula}
-                          </option>
-                        ))}
-                      </select>
-                    )}
-                    
-                    {errorVendedores && (
-                      <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
-                        <p className="text-sm text-red-600">{errorVendedores}</p>
-                        <Button
-                          onClick={() => cargarVendedoresPorConcesionario(formData.concesionario)}
-                          className="mt-1 text-xs bg-red-600 hover:bg-red-700 text-white"
-                        >
-                          Reintentar
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                )}
+                     {/* Selector de Vendedor */}
+                     {formData.concesionario && (
+                       <div>
+                         <label className="block text-sm font-medium text-gray-700 mb-1">Seleccionar Vendedor</label>
+                         {loadingVendedores ? (
+                           <div className="text-center py-4">
+                             <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600"></div>
+                             <p className="text-sm text-gray-600 mt-2">Cargando vendedores del concesionario...</p>
+                           </div>
+                         ) : (
+                           <select
+                             name="vendedor"
+                             value={formData.vendedor}
+                             onChange={handleInputChange}
+                             className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           >
+                             <option value="">Seleccione un vendedor</option>
+                             {vendedores.map((vendedor) => (
+                               <option key={vendedor.id} value={vendedor.id}>
+                                 {vendedor.nombre} - {vendedor.cedula}
+                               </option>
+                             ))}
+                           </select>
+                         )}
+                         
+                         {errorVendedores && (
+                           <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
+                             <p className="text-sm text-red-600">{errorVendedores}</p>
+                             <Button
+                               onClick={() => cargarVendedoresPorConcesionario(formData.concesionario)}
+                               className="mt-1 text-xs bg-red-600 hover:bg-red-700 text-white"
+                             >
+                               Reintentar
+                             </Button>
+                           </div>
+                         )}
+                       </div>
+                     )}
+                   </>
+                 )}
 
-                {formData.concesionario && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Seleccionar Vehículo</label>
+                 {/* Mostrar información del vendedor logueado */}
+                 {user?.rol === 'VENDEDOR' && (
+                   <div className="space-y-4">
+                     {/* Información del vendedor */}
+                     <div className="bg-blue-50 rounded-lg p-4 border border-blue-200 mb-4">
+                       <h4 className="text-md font-medium text-blue-800 mb-2">👤 Vendedor Logueado</h4>
+                       <div className="text-sm text-gray-700">
+                         <p>Como vendedor logueado, solo puede crear solicitudes para vehículos de su concesionario.</p>
+                         {loadingVendedorInfo ? (
+                           <div className="mt-2 flex items-center">
+                             <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                             <span>Cargando información del vendedor...</span>
+                           </div>
+                         ) : vendedorInfo && concesionarioInfo ? (
+                           <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-blue-600">
+                             <p><strong>Vendedor:</strong> {vendedorInfo.nombre}</p>
+                             <p><strong>Cédula:</strong> {vendedorInfo.cedula}</p>
+                             <p><strong>Concesionario:</strong> {concesionarioInfo.razonSocial}</p>
+                             <p><strong>RUC:</strong> {concesionarioInfo.ruc}</p>
+                           </div>
+                         ) : null}
+                       </div>
+                     </div>
+
+
+                   </div>
+                 )}
+
+                                 {(formData.concesionario || (user?.rol === 'VENDEDOR' && concesionarioInfo)) && (
+                   <div>
+                     <label className="block text-sm font-medium text-gray-700 mb-1">Seleccionar Vehículo</label>
                     {loadingVehiculosConcesionario ? (
                       <div className="text-center py-4">
                         <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-orange-600"></div>
@@ -951,61 +1209,61 @@ const CreateLoanPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* Información del concesionario y vendedor seleccionado */}
-                {formData.concesionario && (
-                  <div className="bg-purple-50 rounded-lg p-4 border border-purple-200 mb-4">
-                    <h3 className="text-lg font-medium text-gray-900 mb-3">Información del Concesionario</h3>
-                    {(() => {
-                      const concesionarioInfo = concesionarios.find(c => c.ruc === formData.concesionario);
-                      if (!concesionarioInfo) return null;
-                      
-                      return (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <span className="text-sm text-gray-600">Razón Social:</span>
-                            <p className="font-medium text-sm">{concesionarioInfo.razonSocial}</p>
-                          </div>
-                          <div>
-                            <span className="text-sm text-gray-600">RUC:</span>
-                            <p className="font-medium text-sm">{concesionarioInfo.ruc}</p>
-                          </div>
-                        </div>
-                      );
-                    })()}
-                    
-                    {/* Información del vendedor seleccionado */}
-                    {formData.vendedor && (
-                      <div className="mt-4 pt-4 border-t border-purple-200">
-                        <h4 className="text-md font-medium text-gray-900 mb-2">Vendedor Asignado</h4>
-                        {(() => {
-                          const vendedorInfo = vendedores.find(v => v.id === formData.vendedor);
-                          if (!vendedorInfo) return null;
-                          
-                          return (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div>
-                                <span className="text-sm text-gray-600">Nombre:</span>
-                                <p className="font-medium text-sm">{vendedorInfo.nombre}</p>
-                              </div>
-                              <div>
-                                <span className="text-sm text-gray-600">Cédula:</span>
-                                <p className="font-medium text-sm">{vendedorInfo.cedula}</p>
-                              </div>
-                              <div>
-                                <span className="text-sm text-gray-600">Teléfono:</span>
-                                <p className="font-medium text-sm">{vendedorInfo.telefono}</p>
-                              </div>
-                              <div>
-                                <span className="text-sm text-gray-600">Email:</span>
-                                <p className="font-medium text-sm">{vendedorInfo.email}</p>
-                              </div>
-                            </div>
-                          );
-                        })()}
-                      </div>
-                    )}
-                  </div>
-                )}
+                                 {/* Información del concesionario y vendedor seleccionado (solo para ADMIN) */}
+                 {user?.rol !== 'VENDEDOR' && formData.concesionario && (
+                   <div className="bg-purple-50 rounded-lg p-4 border border-purple-200 mb-4">
+                     <h3 className="text-lg font-medium text-gray-900 mb-3">Información del Concesionario</h3>
+                     {(() => {
+                       const concesionarioSeleccionado = concesionarios.find(c => c.ruc === formData.concesionario);
+                       if (!concesionarioSeleccionado) return null;
+                       
+                       return (
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                           <div>
+                             <span className="text-sm text-gray-600">Razón Social:</span>
+                             <p className="font-medium text-sm">{concesionarioSeleccionado.razonSocial}</p>
+                           </div>
+                           <div>
+                             <span className="text-sm text-gray-600">RUC:</span>
+                             <p className="font-medium text-sm">{concesionarioSeleccionado.ruc}</p>
+                           </div>
+                         </div>
+                       );
+                     })()}
+                     
+                     {/* Información del vendedor seleccionado */}
+                     {formData.vendedor && (
+                       <div className="mt-4 pt-4 border-t border-purple-200">
+                         <h4 className="text-md font-medium text-gray-900 mb-2">Vendedor Asignado</h4>
+                         {(() => {
+                           const vendedorSeleccionado = vendedores.find(v => v.id === formData.vendedor);
+                           if (!vendedorSeleccionado) return null;
+                           
+                           return (
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                               <div>
+                                 <span className="text-sm text-gray-600">Nombre:</span>
+                                 <p className="font-medium text-sm">{vendedorSeleccionado.nombre}</p>
+                               </div>
+                               <div>
+                                 <span className="text-sm text-gray-600">Cédula:</span>
+                                 <p className="font-medium text-sm">{vendedorSeleccionado.cedula}</p>
+                               </div>
+                               <div>
+                                 <span className="text-sm text-gray-600">Teléfono:</span>
+                                 <p className="font-medium text-sm">{vendedorSeleccionado.telefono}</p>
+                               </div>
+                               <div>
+                                 <span className="text-sm text-gray-600">Email:</span>
+                                 <p className="font-medium text-sm">{vendedorSeleccionado.email}</p>
+                               </div>
+                             </div>
+                           );
+                         })()}
+                       </div>
+                     )}
+                   </div>
+                 )}
 
                 {/* Información del vehículo seleccionado */}
                 {vehiculoDetallado && (
@@ -1229,15 +1487,15 @@ const CreateLoanPage: React.FC = () => {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Valor del Vehículo:</span>
-                  <span className="font-medium text-green-600">{formatCurrency(formData.valorVehiculo)}</span>
+                  <span className="font-medium text-green-600">{formatCurrency(parseFloat(formData.valorVehiculo) || 0)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Valor de Entrada:</span>
-                  <span className="font-medium text-blue-600">{formatCurrency(formData.valorEntrada)}</span>
+                  <span className="font-medium text-blue-600">{formatCurrency(parseFloat(formData.valorEntrada) || 0)}</span>
                 </div>
                 <div className="flex justify-between pt-2 border-t border-green-200">
                   <span className="text-gray-900 font-medium">Monto Solicitado:</span>
-                  <span className="text-xl font-bold text-green-600">{formatCurrency(((parseFloat(formData.valorVehiculo) || 0) - (parseFloat(formData.valorEntrada) || 0)).toString())}</span>
+                  <span className="text-xl font-bold text-green-600">{formatCurrency((parseFloat(formData.valorVehiculo) || 0) - (parseFloat(formData.valorEntrada) || 0))}</span>
                 </div>
                 
                 {/* Información de la cuota mensual */}
@@ -1245,12 +1503,12 @@ const CreateLoanPage: React.FC = () => {
                   <div className="pt-2 border-t border-green-200">
                     <div className="flex justify-between">
                       <span className="text-gray-900 font-medium">Cuota Mensual:</span>
-                      <span className="text-lg font-bold text-blue-600">{formatCurrency(calcularCuotaMensual().toString())}</span>
+                      <span className="text-lg font-bold text-blue-600">{formatCurrency(calcularCuotaMensual())}</span>
                     </div>
                     <div className="flex justify-between mt-1">
                       <span className="text-sm text-gray-600">Capacidad de Pago:</span>
                       <span className={`text-sm font-medium ${validarCapacidadPago() ? 'text-green-600' : 'text-red-600'}`}>
-                        {formatCurrency(formData.capacidadPago)}
+                        {formatCurrency(parseFloat(formData.capacidadPago) || 0)}
                       </span>
                     </div>
                   </div>
@@ -1272,11 +1530,11 @@ const CreateLoanPage: React.FC = () => {
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">Monto Mínimo:</span>
-                          <span className="font-medium text-blue-600">{formatCurrency(prestamoSeleccionado.montoMinimo.toString())}</span>
+                          <span className="font-medium text-blue-600">{formatCurrency(prestamoSeleccionado.montoMinimo)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">Monto Máximo:</span>
-                          <span className="font-medium text-blue-600">{formatCurrency(prestamoSeleccionado.montoMaximo.toString())}</span>
+                          <span className="font-medium text-blue-600">{formatCurrency(prestamoSeleccionado.montoMaximo)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">Plazo:</span>
@@ -1474,6 +1732,193 @@ const CreateLoanPage: React.FC = () => {
             )}
           </div>
         </form>
+
+        {/* Modal de Resultado */}
+        {modalResultadoAbierto && resultadoSolicitud && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            onClick={cerrarModalYRedirigir}
+          >
+            <div 
+              className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header del Modal */}
+              <div className={`flex justify-between items-center p-6 border-b ${
+                resultadoSolicitud.exito ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'
+              }`}>
+                <div className="flex items-center">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center mr-4 ${
+                    resultadoSolicitud.exito ? 'bg-green-100' : 'bg-red-100'
+                  }`}>
+                    {resultadoSolicitud.exito ? (
+                      <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : (
+                      <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    )}
+                  </div>
+                  <div>
+                    <h2 className={`text-xl font-bold ${
+                      resultadoSolicitud.exito ? 'text-green-800' : 'text-red-800'
+                    }`}>
+                      {resultadoSolicitud.titulo}
+                    </h2>
+                  </div>
+                </div>
+                <button
+                  onClick={cerrarModalYRedirigir}
+                  className={`text-gray-400 hover:text-gray-600 transition-colors ${
+                    resultadoSolicitud.exito ? 'hover:text-green-600' : 'hover:text-red-600'
+                  }`}
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Contenido del Modal */}
+              <div className="p-6">
+                <p className="text-gray-700 text-lg mb-6">{resultadoSolicitud.mensaje}</p>
+
+                {/* Mostrar número de solicitud si es exitoso */}
+                {resultadoSolicitud.exito && resultadoSolicitud.numeroSolicitud && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <div className="flex items-center">
+                      <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <span className="text-sm font-medium text-blue-800">Número de Solicitud:</span>
+                    </div>
+                    <p className="text-xl font-bold text-blue-900 mt-1 font-mono">
+                      {resultadoSolicitud.numeroSolicitud}
+                    </p>
+                  </div>
+                )}
+
+                {/* Detalles de la solicitud */}
+                {resultadoSolicitud.detalles && (
+                  <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                    <h3 className="text-md font-semibold text-gray-900 mb-3">
+                      {resultadoSolicitud.exito ? 'Resumen de la Solicitud' : 'Detalles del Error'}
+                    </h3>
+                    
+                    {resultadoSolicitud.exito ? (
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Cliente:</span>
+                          <span className="font-medium">{resultadoSolicitud.detalles.cliente}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Monto Solicitado:</span>
+                          <span className="font-medium text-green-600">
+                            ${resultadoSolicitud.detalles.monto?.toLocaleString('es-CO')}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Plazo:</span>
+                          <span className="font-medium">{resultadoSolicitud.detalles.plazo} meses</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Vehículo:</span>
+                          <span className="font-medium">{resultadoSolicitud.detalles.vehiculo}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Código de Error:</span>
+                          <span className="font-medium text-red-600">{resultadoSolicitud.detalles.codigo}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Fecha/Hora:</span>
+                          <span className="font-medium">{resultadoSolicitud.detalles.timestamp}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Mensaje adicional para éxito */}
+                {resultadoSolicitud.exito && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                    <div className="flex items-start">
+                      <svg className="w-5 h-5 text-green-600 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <div className="text-sm text-green-700">
+                        <p className="font-medium mb-1">¿Qué sigue?</p>
+                        <ul className="space-y-1">
+                          <li>• Su solicitud será evaluada por nuestro equipo de análisis</li>
+                          <li>• Recibirá una notificación sobre el estado de su solicitud</li>
+                          <li>• Puede consultar el progreso en la sección "Solicitudes"</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Información de navegación */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                  <div className="flex items-start">
+                    <svg className="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div className="text-sm text-blue-700">
+                      <p className="font-medium mb-1">💡 Navegación Automática</p>
+                      <p>Al cerrar este modal, será redirigido automáticamente a la página de solicitudes donde podrá ver el estado de todas sus solicitudes.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer del Modal */}
+              <div className="flex justify-end space-x-3 p-6 border-t border-gray-200 bg-gray-50">
+                {resultadoSolicitud.exito ? (
+                  <>
+                    <Button
+                      onClick={() => {
+                        setModalResultadoAbierto(false);
+                        // Resetear formulario para crear otra solicitud
+                        window.location.reload();
+                      }}
+                      variant="outline"
+                      className="border-gray-300 text-gray-700 hover:bg-gray-100"
+                    >
+                      Crear Otra Solicitud
+                    </Button>
+                    <Button
+                      onClick={cerrarModalYRedirigir}
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      Ver Mis Solicitudes
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      onClick={cerrarModalYRedirigir}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      Volver a Solicitudes
+                    </Button>
+                    <Button
+                      onClick={() => setModalResultadoAbierto(false)}
+                      variant="outline"
+                      className="border-gray-300 text-gray-700 hover:bg-gray-100"
+                    >
+                      Intentar Nuevamente
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

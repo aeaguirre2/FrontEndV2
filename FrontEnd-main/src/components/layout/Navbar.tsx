@@ -62,8 +62,7 @@ const Navbar: React.FC<NavbarProps> = ({ onSidebarToggle }) => {
         return 'Productos de Crédito';
       case '/products/interest':
         return 'Tasas de Interés';
-      case '/credit-simulation':
-        return 'Simulador de Crédito';
+
       case '/loans':
         return 'Solicitudes de Préstamo';
       case '/analysis':
@@ -110,9 +109,7 @@ const Navbar: React.FC<NavbarProps> = ({ onSidebarToggle }) => {
           case 'interest':
             label = 'Tasas de Interés';
             break;
-          case 'credit-simulation':
-            label = 'Simulador';
-            break;
+
           case 'loans':
             label = 'Solicitudes';
             break;

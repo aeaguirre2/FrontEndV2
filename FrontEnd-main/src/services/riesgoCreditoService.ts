@@ -13,22 +13,31 @@ export interface ConsultaBuroCreditoResponse {
 
 export interface IngresosInternoDto {
   id: number;
-  clienteId: number;
-  tipoIngreso: string;
-  monto: number;
-  frecuencia: string;
-  fuente: string;
+  cedulaCliente: string;
+  nombres: string;
+  institucionBancaria: string;
+  producto: string;
+  saldoPromedioMes: number;
+  numeroCuenta: string;
+  fechaActualizacion: string;
   fechaRegistro: string;
+  version: number;
 }
 
 export interface EgresosInternoDto {
   id: number;
-  clienteId: number;
-  tipoEgreso: string;
-  monto: number;
-  frecuencia: string;
-  categoria: string;
+  cedulaCliente: string;
+  nombres: string;
+  institucionBancaria: string;
+  producto: string;
+  saldoPendiente: number;
+  mesesPendientes: number;
+  cuotaPago: number;
+  mora: string;
+  moraUltimosTresMeses: string;
+  fechaActualizacion: string;
   fechaRegistro: string;
+  version: number;
 }
 
 export interface IngresosExternoDto {

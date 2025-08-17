@@ -22,8 +22,7 @@ import VehiclesPage from '../pages/vehicles/VehiclesPage';
 import ProductsPage from '../pages/products/ProductsPage';
 import InterestRatesPage from '../pages/products/InterestRatesPage';
 
-// Simulation
-import CreditSimulationPage from '../pages/simulation/CreditSimulationPage';
+
 
 // Loans
 import LoansPage from '../pages/loans/LoansPage';
@@ -140,17 +139,6 @@ const AppRoutes: React.FC = () => {
         } 
       />
       
-      {/* Credit Simulation */}
-      <Route 
-        path="/credit-simulation" 
-        element={
-          <ProtectedRoute>
-            <AppLayout>
-              <CreditSimulationPage />
-            </AppLayout>
-          </ProtectedRoute>
-        } 
-      />
       
       {/* Loans */}
       <Route 

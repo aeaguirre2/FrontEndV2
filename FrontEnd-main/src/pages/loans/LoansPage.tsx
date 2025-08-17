@@ -1,14 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../components/ui/Button';
-import Input from '../../components/ui/Input';
+
 import { loanService, type SolicitudCredito, type SolicitudConsultaRequest, type SolicitudDetalladaResponseDTO } from '../../services/loanService';
 import { prestamoService } from '../../services/prestamoService';
+import { useAuth } from '../../contexts/AuthContext';
 
 // Iconos (puedes usar lucide-react o cualquier librería de iconos)
 const CalendarIcon = () => (
   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+  </svg>
+);
+
+const PersonIcon = () => (
+  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
   </svg>
 );
 
@@ -115,6 +122,7 @@ const ErrorMessage: React.FC<{ message: string; onRetry: () => void; onDismiss: 
 };
 
 const LoansPage: React.FC = () => {
+  const { user } = useAuth();
   const [solicitudes, setSolicitudes] = useState<SolicitudCredito[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -124,6 +132,11 @@ const LoansPage: React.FC = () => {
   const [solicitudDetalle, setSolicitudDetalle] = useState<SolicitudDetalladaResponseDTO | null>(null);
   const [loadingDetalle, setLoadingDetalle] = useState(false);
   const [errorDetalle, setErrorDetalle] = useState<string | null>(null);
+
+  // Estados para información del vendedor logueado
+  const [vendedorInfo, setVendedorInfo] = useState<any>(null);
+  const [concesionarioInfo, setConcesionarioInfo] = useState<any>(null);
+  const [loadingVendedorInfo, setLoadingVendedorInfo] = useState(false);
   
   // Estados para el modal de edición
   const [modalEdicionAbierto, setModalEdicionAbierto] = useState(false);
@@ -139,7 +152,6 @@ const LoansPage: React.FC = () => {
   });
   
   // Estados para préstamos y cálculos
-  const [prestamos, setPrestamos] = useState<any[]>([]);
   const [prestamoSeleccionado, setPrestamoSeleccionado] = useState<any>(null);
   const [plazosDisponibles, setPlazosDisponibles] = useState<number[]>([]);
   const [entradaSugerida, setEntradaSugerida] = useState<number | null>(null);
@@ -173,12 +185,19 @@ const LoansPage: React.FC = () => {
     setFechaFin(fin);
   }, []);
 
-  // Cargar datos cuando cambien los filtros
+  // Cargar datos cuando cambien los filtros o se cargue la información del vendedor
   useEffect(() => {
     if (fechaInicio && fechaFin) {
-      cargarSolicitudes();
+      // Si es admin, cargar inmediatamente
+      if (user?.rol !== 'VENDEDOR') {
+        cargarSolicitudes();
+      }
+      // Si es vendedor, cargar solo cuando tengamos su información
+      else if (user?.rol === 'VENDEDOR' && vendedorInfo && concesionarioInfo) {
+        cargarSolicitudes();
+      }
     }
-  }, [fechaInicio, fechaFin, estado, cedulaVendedor, rucConcesionario, pagina]);
+  }, [fechaInicio, fechaFin, estado, cedulaVendedor, rucConcesionario, pagina, vendedorInfo, concesionarioInfo, user]);
 
   // Función para formatear fecha para input datetime-local
   const formatDateForInput = (dateString: string): string => {
@@ -233,14 +252,35 @@ const LoansPage: React.FC = () => {
       setLoading(false);
       return;
     }
+
+    // Si es vendedor y no se ha cargado su información, esperar
+    if (user?.rol === 'VENDEDOR' && !vendedorInfo) {
+      console.log('Esperando información del vendedor...');
+      setLoading(false);
+      return;
+    }
     
     try {
+      // Determinar filtros según el rol del usuario
+      let cedulaVendedorFiltro = cedulaVendedor || undefined;
+      let rucConcesionarioFiltro = rucConcesionario || undefined;
+
+      if (user?.rol === 'VENDEDOR' && vendedorInfo && concesionarioInfo) {
+        // Si es vendedor, filtrar solo por sus solicitudes
+        cedulaVendedorFiltro = vendedorInfo.cedula;
+        rucConcesionarioFiltro = concesionarioInfo.ruc;
+        console.log('🔍 Filtrando solicitudes para vendedor:', {
+          cedulaVendedor: cedulaVendedorFiltro,
+          rucConcesionario: rucConcesionarioFiltro
+        });
+      }
+
       const request: SolicitudConsultaRequest = {
         fechaInicio,
         fechaFin,
         estado: estado || undefined,
-        cedulaVendedor: cedulaVendedor || undefined,
-        rucConcesionario: rucConcesionario || undefined,
+        cedulaVendedor: cedulaVendedorFiltro,
+        rucConcesionario: rucConcesionarioFiltro,
         pagina,
         tamanoPagina
       };
@@ -496,7 +536,6 @@ const LoansPage: React.FC = () => {
       const prestamosData = await prestamoService.obtenerPrestamosActivos();
       const prestamoActual = prestamosData.find(p => p.id === detalle.idPrestamo);
       setPrestamoSeleccionado(prestamoActual);
-      setPrestamos(prestamosData);
       
       // Generar plazos disponibles
       if (prestamoActual) {
@@ -526,6 +565,54 @@ const LoansPage: React.FC = () => {
     navigate(`/loans/simulate/${numeroSolicitud}`);
   };
 
+  // Función para cargar información del vendedor logueado (similar a CreateLoanPage)
+  const cargarInfoVendedor = async () => {
+    if (!user?.email) {
+      console.log('Usuario no tiene email:', user);
+      return;
+    }
+
+    setLoadingVendedorInfo(true);
+    try {
+      console.log('🔄 Cargando información del vendedor con email:', user.email);
+      
+      // Paso 1: Obtener información del concesionario usando el email del vendedor
+      const concesionarioResponse = await fetch(`http://localhost:8080/api/concesionarios/v1/vendedor-email/${user.email}`);
+      
+      if (!concesionarioResponse.ok) {
+        throw new Error(`Error al obtener concesionario: ${concesionarioResponse.statusText}`);
+      }
+      
+      const concesionarioData = await concesionarioResponse.json();
+      console.log('✅ Información del concesionario obtenida:', concesionarioData);
+      setConcesionarioInfo(concesionarioData);
+      
+      // Paso 2: Obtener información del vendedor usando RUC y email
+      const vendedorResponse = await fetch(`http://localhost:8080/api/concesionarios/v1/ruc/${concesionarioData.ruc}/vendedores/email/${encodeURIComponent(user.email)}`);
+      
+      if (!vendedorResponse.ok) {
+        throw new Error(`Error al obtener vendedor: ${vendedorResponse.statusText}`);
+      }
+      
+      const vendedorData = await vendedorResponse.json();
+      console.log('✅ Información del vendedor obtenida:', vendedorData);
+      setVendedorInfo(vendedorData);
+      
+    } catch (error: any) {
+      console.error('❌ Error al cargar información del vendedor:', error);
+      setError(`Error al cargar información del vendedor: ${error.message}`);
+    } finally {
+      setLoadingVendedorInfo(false);
+    }
+  };
+
+  // Cargar información del vendedor al montar el componente si es vendedor
+  useEffect(() => {
+    if (user?.rol === 'VENDEDOR' && user?.email) {
+      cargarInfoVendedor();
+    }
+  }, [user]);
+
   const navigate = useNavigate();
 
   return (
@@ -544,9 +631,50 @@ const LoansPage: React.FC = () => {
 
       {/* Filtros y Métricas */}
       <div className="space-y-6">
+        {/* Información del vendedor logueado */}
+        {user?.rol === 'VENDEDOR' && (
+          <div className="bg-blue-50 rounded-lg shadow-sm border border-blue-200 p-6">
+            <div className="flex items-center mb-4">
+              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                <PersonIcon />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-blue-900">👤 Panel de Vendedor</h3>
+                <p className="text-sm text-blue-700">Visualizando únicamente sus solicitudes de crédito</p>
+              </div>
+            </div>
+            
+            {loadingVendedorInfo ? (
+              <div className="flex items-center">
+                <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                <span className="text-sm text-blue-700">Cargando información del vendedor...</span>
+              </div>
+            ) : vendedorInfo && concesionarioInfo ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-blue-600 font-medium">Vendedor:</span>
+                  <p className="text-blue-800 font-semibold">{vendedorInfo.nombre}</p>
+                </div>
+                <div>
+                  <span className="text-blue-600 font-medium">Cédula:</span>
+                  <p className="text-blue-800 font-semibold">{vendedorInfo.cedula}</p>
+                </div>
+                <div>
+                  <span className="text-blue-600 font-medium">Concesionario:</span>
+                  <p className="text-blue-800 font-semibold">{concesionarioInfo.razonSocial}</p>
+                </div>
+                <div>
+                  <span className="text-blue-600 font-medium">RUC:</span>
+                  <p className="text-blue-800 font-semibold">{concesionarioInfo.ruc}</p>
+                </div>
+              </div>
+            ) : null}
+          </div>
+        )}
+
         {/* Filtro de fechas */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className={`grid grid-cols-1 md:grid-cols-2 ${user?.rol === 'VENDEDOR' ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-4`}>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Fecha Inicio</label>
               <input
@@ -579,14 +707,41 @@ const LoansPage: React.FC = () => {
                 <option value="RECHAZADA">Rechazada</option>
               </select>
             </div>
-            <div className="flex items-end space-x-2">
+            
+            {/* Solo mostrar filtros adicionales para admin */}
+            {user?.rol !== 'VENDEDOR' && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Cédula Vendedor</label>
+                  <input
+                    type="text"
+                    value={cedulaVendedor}
+                    onChange={(e) => setCedulaVendedor(e.target.value)}
+                    placeholder="Filtrar por vendedor"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">RUC Concesionario</label>
+                  <input
+                    type="text"
+                    value={rucConcesionario}
+                    onChange={(e) => setRucConcesionario(e.target.value)}
+                    placeholder="Filtrar por concesionario"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </>
+            )}
+            
+            <div className={`flex items-end space-x-2 ${user?.rol === 'VENDEDOR' ? 'md:col-span-2 lg:col-span-1' : ''}`}>
               <Button onClick={handleSemanaActual} variant="outline" className="flex items-center space-x-2">
-                <XIcon />
+                <CalendarIcon />
                 <span>Semana actual</span>
-          </Button>
+              </Button>
               <Button onClick={handleMesActual} variant="outline">
                 Mes actual
-          </Button>
+              </Button>
             </div>
           </div>
         </div>

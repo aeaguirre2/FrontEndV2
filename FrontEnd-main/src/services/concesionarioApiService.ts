@@ -14,12 +14,12 @@ class ConcesionarioApiService {
   });
 
   async getConcesionariosByEstado(estado: string): Promise<Concesionario[]> {
-    const response = await this.client.get<Concesionario[]>(`/api/concesionarios/v1/estado/${estado}`);
+    const response = await this.client.get<Concesionario[]>(`/api/concesionarios/${API_CONFIG.VERSION}/estado/${estado}`);
     return response.data;
   }
 
   async getVehiculosByRuc(ruc: string): Promise<VehiculoEnConcesionario[]> {
-    const response = await this.client.get<VehiculoEnConcesionario[]>(`/api/concesionarios/v1/ruc/${ruc}/vehiculos`);
+    const response = await this.client.get<VehiculoEnConcesionario[]>(`/api/concesionarios/${API_CONFIG.VERSION}/ruc/${ruc}/vehiculos`);
     return response.data;
   }
 }

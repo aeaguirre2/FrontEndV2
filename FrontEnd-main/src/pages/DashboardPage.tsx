@@ -209,19 +209,19 @@ const DashboardPage: React.FC = () => {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Acciones Rápidas</h3>
           <div className="grid grid-cols-2 gap-4">
             <Link
-              to="/credit-simulation"
-              className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors text-center"
-            >
-              <div className="text-2xl mb-2">🧮</div>
-              <div className="text-sm font-medium text-gray-700">Simular Crédito</div>
-            </Link>
-            
-            <Link
-              to="/loans"
+              to="/loans/create"
               className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-green-500 hover:bg-green-50 transition-colors text-center"
             >
               <div className="text-2xl mb-2">📄</div>
               <div className="text-sm font-medium text-gray-700">Nueva Solicitud</div>
+            </Link>
+            
+            <Link
+              to="/loans"
+              className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors text-center"
+            >
+              <div className="text-2xl mb-2">📋</div>
+              <div className="text-sm font-medium text-gray-700">Ver Solicitudes</div>
             </Link>
             
             <Link

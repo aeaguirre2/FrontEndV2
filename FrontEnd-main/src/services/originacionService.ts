@@ -33,6 +33,24 @@ export interface SolicitudConsultaPaginadaResponseDTO {
   tieneAnterior: boolean;
 }
 
+export interface CrearSolicitudRequestDTO {
+  cedulaSolicitante: string;
+  idPrestamo: string;
+  placaVehiculo: string;
+  rucConcesionario: string;
+  cedulaVendedor: string;
+  valorEntrada: number;
+  plazoMeses: number;
+  calificacionSolicitante: string;
+  capacidadPagoSolicitante: number;
+}
+
+export interface CrearSolicitudResponseDTO {
+  numeroSolicitud: string;
+  estado: string;
+  mensaje?: string;
+}
+
 class OriginacionService {
   private baseUrl = MICROSERVICES.ORIGINACION;
 
@@ -72,6 +90,11 @@ class OriginacionService {
       requestData
     );
     return { data: response.data };
+  }
+
+  async crearSolicitud(data: CrearSolicitudRequestDTO): Promise<CrearSolicitudResponseDTO> {
+    const response = await this.client.post<CrearSolicitudResponseDTO>('/api/originacion/v1/solicitudes', data);
+    return response.data;
   }
 }
 

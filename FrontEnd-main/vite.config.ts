@@ -12,41 +12,34 @@ export default defineConfig({
     },
     proxy: {
       '/api/analisis': {
-        target: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com',
+        target: 'http://localhost',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api\/analisis/, '/api/analisis')
       },
-      '/api/vehiculos': {
-        target: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com',
+      '/api/concesionarios': {
+        target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api\/vehiculos/, '/api/vehiculos')
+        rewrite: (path) => path.replace(/^\/api\/concesionarios/, '/api/concesionarios')
       },
-      // Comentado temporalmente para evitar conflictos
-      // '/api/concesionarios': {
-      //   target: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com',
-      //   changeOrigin: true,
-      //   secure: false,
-      //   rewrite: (path) => path.replace(/^\/api\/concesionarios/, '/api/vehiculos')
-      // },
       '/api/v1': {
-        target: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com',
+        target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api\/v1/, '/api/vehiculos')
+        rewrite: (path) => path.replace(/^\/api\/v1/, '/api/v1')
       },
       '/api/clientes': {
-        target: 'http://localhost:83',
+        target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api\/clientes/, '/api/clientes')
       },
       '/api/catalog': {
-        target: 'http://localhost:82',
+        target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api\/catalog/, '/api/catalogo')
+        rewrite: (path) => path.replace(/^\/api\/catalog/, '/api/catalog')
       },
       '/api/originacion': {
         target: 'http://localhost:81',

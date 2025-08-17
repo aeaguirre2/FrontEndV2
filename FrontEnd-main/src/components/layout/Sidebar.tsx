@@ -76,12 +76,7 @@ const Sidebar: React.FC<{ isCollapsed: boolean; onToggle: () => void }> = ({ isC
             },
           ],
         },
-        {
-          label: 'Simulador',
-          href: ROUTES.CREDIT_SIMULATION,
-          icon: '🧮',
-          roles: ['ADMIN'],
-        },
+
         {
           label: 'Solicitudes',
           href: ROUTES.LOANS,
@@ -123,12 +118,7 @@ const Sidebar: React.FC<{ isCollapsed: boolean; onToggle: () => void }> = ({ isC
           icon: '🚗',
           roles: ['VENDEDOR'],
         },
-        {
-          label: 'Simulador',
-          href: ROUTES.CREDIT_SIMULATION,
-          icon: '🧮',
-          roles: ['VENDEDOR'],
-        },
+
         {
           label: 'Solicitudes',
           href: ROUTES.LOANS,

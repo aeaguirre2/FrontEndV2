@@ -1,6 +1,6 @@
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: 'http://localhost:8080',
+  BASE_URL: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/vehiculos',
   VERSION: import.meta.env.VITE_API_VERSION || 'v1',
   TIMEOUT: 30000,
   RETRY_ATTEMPTS: 3,
@@ -9,13 +9,13 @@ export const API_CONFIG = {
 
 // Microservices endpoints - Sistema de Préstamos Automotrices
 export const MICROSERVICES = {
-  // Gestión Vehículos (puerto 8080) - Para login y gestión de vehículos
-  VEHICULOS: 'http://localhost:8080',
-  CONCESIONARIOS: 'http://localhost:8080',
+  // Gestión Vehículos - PRODUCCIÓN AWS
+  VEHICULOS: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/vehiculos',
+  CONCESIONARIOS: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/vehiculos',
   
   // Análisis Services
   ORIGINACION: 'http://localhost:81',
-  FORMALIZACION: 'http://localhost:8080',
+  FORMALIZACION: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/vehiculos',
   
   // Documentación Service (puerto 84)
   DOCUMENTACION: 'http://localhost:84',
@@ -23,22 +23,22 @@ export const MICROSERVICES = {
   // Transacciones Service (puerto 85)
   TRANSACCIONES: 'http://localhost:85',
   
-                // Core Services
-              GENERAL: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/general',
-              CLIENTES: 'http://localhost:83/api/clientes',
-              CUENTAS_CONFIG: 'http://localhost:8080',
-              CUENTAS_TRANS: 'http://localhost:8085',
-              CATALOG: 'http://localhost:82/api/catalogo',
+  // Core Services
+  GENERAL: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/general',
+  CLIENTES: 'http://localhost:83/api/clientes',
+  CUENTAS_CONFIG: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/vehiculos',
+  CUENTAS_TRANS: 'http://localhost:8085',
+  CATALOG: 'http://localhost:82/api/catalogo',
   
   // Legacy compatibility
-  VEHICLES: 'http://localhost:8080',
-  CREDIT_PRODUCTS: 'http://localhost:8080',
-  SIMULATION: 'http://localhost:8080',
-  LOANS: 'http://localhost:8080',
-  ANALYSIS: 'http://localhost:8080',
-  CONTRACTS: 'http://localhost:8080',
-  INTEREST: 'http://localhost:8080',
-  NOTIFICATIONS: 'http://localhost:8080',
+  VEHICLES: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/vehiculos',
+  CREDIT_PRODUCTS: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/vehiculos',
+  SIMULATION: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/vehiculos',
+  LOANS: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/vehiculos',
+  ANALYSIS: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/vehiculos',
+  CONTRACTS: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/vehiculos',
+  INTEREST: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/vehiculos',
+  NOTIFICATIONS: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/vehiculos',
   
   // Riesgo Crediticio (puerto 80) - Backend separado
   RIESGO_CREDITO: 'http://localhost:80',

@@ -1,14 +1,51 @@
-import { api } from './api';
+import axios from 'axios';
 import type { LoginRequest, LoginResponse, Usuario } from '../types/auth';
 import { MICROSERVICES } from '../constants';
 
 class AuthService {
   private readonly BASE_URL = `${MICROSERVICES.CONCESIONARIOS}/api/concesionarios/v1/auth`;
 
+  private client = axios.create({
+    baseURL: this.BASE_URL,
+    timeout: 30000,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  // Configurar interceptor para agregar headers de autenticación
+  constructor() {
+    console.log('🔧 AuthService - BASE_URL:', this.BASE_URL);
+    
+    this.client.interceptors.request.use(
+      (config) => {
+        console.log('🔧 AuthService - Request URL:', config.url || 'undefined');
+        console.log('🔧 AuthService - Full URL:', (config.baseURL || '') + (config.url || ''));
+        
+        // Add user email header if available
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+          try {
+            const user = JSON.parse(userStr);
+            if (user.email) {
+              config.headers['X-User-Email'] = user.email;
+            }
+          } catch (error) {
+            console.error('Error parsing user from localStorage:', error);
+          }
+        }
+        return config;
+      },
+      (error) => {
+        return Promise.reject(error);
+      }
+    );
+  }
+
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     try {
-      const response = await api.post<LoginResponse>(`${this.BASE_URL}/login`, credentials);
-      return response;
+      const response = await this.client.post<LoginResponse>('/login', credentials);
+      return response.data;
     } catch (error) {
       throw new Error('Error en el login. Verifica tus credenciales.');
     }
@@ -16,8 +53,8 @@ class AuthService {
 
   async getCurrentUser(email: string): Promise<Usuario> {
     try {
-      const response = await api.get<Usuario>(`${this.BASE_URL}/usuarios/email/${email}`);
-      return response;
+      const response = await this.client.get<Usuario>(`/usuarios/email/${email}`);
+      return response.data;
     } catch (error) {
       throw new Error('Error al obtener el perfil del usuario.');
     }
@@ -25,17 +62,19 @@ class AuthService {
 
   async getAllUsers(): Promise<Usuario[]> {
     try {
-      const response = await api.get<Usuario[]>(`${this.BASE_URL}/usuarios`);
-      return response;
+      console.log('🔧 AuthService - getAllUsers() called');
+      const response = await this.client.get<Usuario[]>('/usuarios');
+      return response.data;
     } catch (error) {
+      console.error('🔧 AuthService - getAllUsers() error:', error);
       throw new Error('Error al obtener la lista de usuarios.');
     }
   }
 
   async createUser(user: Omit<Usuario, 'id' | 'version'>): Promise<Usuario> {
     try {
-      const response = await api.post<Usuario>(`${this.BASE_URL}/usuarios`, user);
-      return response;
+      const response = await this.client.post<Usuario>('/usuarios', user);
+      return response.data;
     } catch (error) {
       throw new Error('Error al crear el usuario.');
     }
@@ -43,8 +82,8 @@ class AuthService {
 
   async updateUser(id: string, user: Partial<Usuario>): Promise<Usuario> {
     try {
-      const response = await api.put<Usuario>(`${this.BASE_URL}/usuarios/${id}`, user);
-      return response;
+      const response = await this.client.put<Usuario>(`/usuarios/${id}`, user);
+      return response.data;
     } catch (error) {
       throw new Error('Error al actualizar el usuario.');
     }
@@ -52,7 +91,7 @@ class AuthService {
 
   async deleteUser(id: string): Promise<void> {
     try {
-      await api.delete(`${this.BASE_URL}/usuarios/${id}`);
+      await this.client.delete(`/usuarios/${id}`);
     } catch (error) {
       throw new Error('Error al eliminar el usuario.');
     }
@@ -60,8 +99,8 @@ class AuthService {
 
   async updateProfile(user: Partial<Usuario>): Promise<Usuario> {
     try {
-      const response = await api.put<Usuario>(`${this.BASE_URL}/usuarios/${user.id}`, user);
-      return response;
+      const response = await this.client.put<Usuario>(`/usuarios/${user.id}`, user);
+      return response.data;
     } catch (error) {
       throw new Error('Error al actualizar el perfil.');
     }

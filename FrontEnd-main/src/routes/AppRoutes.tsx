@@ -267,7 +267,7 @@ const AppRoutes: React.FC = () => {
       <Route
         path="/documentation/:numeroSolicitud"
         element={
-          <ProtectedRoute requiredRole="ADMIN">
+          <ProtectedRoute>
             <AppLayout><DocumentationPage /></AppLayout>
           </ProtectedRoute>
         }
@@ -276,7 +276,7 @@ const AppRoutes: React.FC = () => {
       <Route
         path="/documentation/:numeroSolicitud/validacion"
         element={
-          <ProtectedRoute requiredRole="ADMIN">
+          <ProtectedRoute>
             <AppLayout><DocumentationValidationPage /></AppLayout>
           </ProtectedRoute>
         }
@@ -285,7 +285,7 @@ const AppRoutes: React.FC = () => {
       <Route
         path="/documentation/:numeroSolicitud/contratos"
         element={
-          <ProtectedRoute requiredRole="ADMIN">
+          <ProtectedRoute>
             <AppLayout><ContractUploadPage /></AppLayout>
           </ProtectedRoute>
         }
@@ -294,7 +294,7 @@ const AppRoutes: React.FC = () => {
       {/* 5. Validar contrato y pagaré */}
       <Route path="/documentation/:numeroSolicitud/contratos/validacion"
         element={
-          <ProtectedRoute requiredRole="ADMIN">
+          <ProtectedRoute>
             <AppLayout><ContractsValidationPage /></AppLayout>
           </ProtectedRoute>
         }

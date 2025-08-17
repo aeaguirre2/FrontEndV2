@@ -1,15 +1,27 @@
 // src/pages/documentation/DocumentationListPage.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import originacionService from '../../services/originacionService';
 import type { SolicitudResumenDTO } from '../../services/originacionService';
 
 
 export default function DocumentationListPage() {
+    const { user } = useAuth();
     const [fechaInicio, setFechaInicio] = useState(() => new Date().toISOString().slice(0, 10));
     const [fechaFin, setFechaFin] = useState(() => new Date().toISOString().slice(0, 10));
     const [lista, setLista] = useState<SolicitudResumenDTO[]>([]);
     const navigate = useNavigate();
+
+    // Función para verificar permisos de validación
+    const canValidate = () => {
+        return user?.rol === 'ADMIN' || user?.rol === 'ANALISTA';
+    };
+
+    // Función para verificar permisos de carga
+    const canUpload = () => {
+        return user?.rol === 'ADMIN' || user?.rol === 'VENDEDOR';
+    };
 
     const filtrar = () => {
         // convertir "YYYY-MM-DD" → "YYYY-MM-DDTHH:mm:ss"
@@ -67,8 +79,14 @@ export default function DocumentationListPage() {
                                 { /* Si está aún en BORRADOR, cargo documentos */}
                                 {s.estado === 'BORRADOR' && (
                                     <button
-                                        className="px-2 py-1 bg-green-600 text-white rounded"
-                                        onClick={() => navigate(`/documentation/${s.numeroSolicitud}`)}
+                                        className={`px-2 py-1 rounded ${
+                                            canUpload() 
+                                                ? 'bg-green-600 text-white hover:bg-green-700' 
+                                                : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                        }`}
+                                        onClick={() => canUpload() && navigate(`/documentation/${s.numeroSolicitud}`)}
+                                        disabled={!canUpload()}
+                                        title={!canUpload() ? 'Solo vendedores y administradores pueden cargar documentos' : ''}
                                     >
                                         Cargar Documentación
                                     </button>
@@ -77,8 +95,14 @@ export default function DocumentationListPage() {
                                 { /* Cuando llegue DOCUMENTACION_CARGADA, voy a validar */}
                                 {s.estado === 'DOCUMENTACION_CARGADA' && (
                                     <button
-                                        className="px-2 py-1 bg-blue-600 text-white rounded"
-                                        onClick={() => navigate(`/documentation/${s.numeroSolicitud}/validacion`)}
+                                        className={`px-2 py-1 rounded ${
+                                            canValidate() 
+                                                ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                                                : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                        }`}
+                                        onClick={() => canValidate() && navigate(`/documentation/${s.numeroSolicitud}/validacion`)}
+                                        disabled={!canValidate()}
+                                        title={!canValidate() ? 'Solo analistas y administradores pueden validar documentos' : ''}
                                     >
                                         Validar Documentación
                                     </button>
@@ -87,10 +111,16 @@ export default function DocumentationListPage() {
                                 { /* Cuando llegue DOCUMENTACION_CARGADA, voy a validar */}
                                 {s.estado === 'DOCUMENTACION_VALIDADA' && (
                                     <button
-                                        className="px-2 py-1 bg-yellow-600 text-white rounded"
-                                        onClick={() => navigate(
+                                        className={`px-2 py-1 rounded ${
+                                            canUpload() 
+                                                ? 'bg-yellow-600 text-white hover:bg-yellow-700' 
+                                                : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                        }`}
+                                        onClick={() => canUpload() && navigate(
                                             `/documentation/${s.numeroSolicitud}/contratos`
                                         )}
+                                        disabled={!canUpload()}
+                                        title={!canUpload() ? 'Solo vendedores y administradores pueden cargar contratos' : ''}
                                     >
                                         Cargar Contratos
                                     </button>
@@ -99,10 +129,16 @@ export default function DocumentationListPage() {
                                 { /* Cuando llegue CONTRATO_CARGADO, voy a validar */}
                                 {s.estado === 'CONTRATO_CARGADO' && (
                                     <button
-                                        className="px-2 py-1 bg-yellow-600 text-white rounded"
-                                        onClick={() => navigate(
+                                        className={`px-2 py-1 rounded ${
+                                            canValidate() 
+                                                ? 'bg-yellow-600 text-white hover:bg-yellow-700' 
+                                                : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                        }`}
+                                        onClick={() => canValidate() && navigate(
                                             `/documentation/${s.numeroSolicitud}/contratos/validacion`
                                         )}
+                                        disabled={!canValidate()}
+                                        title={!canValidate() ? 'Solo analistas y administradores pueden validar contratos' : ''}
                                     >
                                         Validar Contratos
                                     </button>
@@ -112,10 +148,14 @@ export default function DocumentationListPage() {
                                                                 { /* Cuando llegue CONTRATO_CARGADO, voy a validar */}
                                 {s.estado === 'CONTRATO_VALIDADO' && (
                                     <button
-                                        className="px-2 py-1 bg-red-600 text-white rounded"
-                                        onClick={() => navigate(
-                                            `#`
-                                        )}
+                                        className={`px-2 py-1 rounded ${
+                                            user?.rol === 'ADMIN' 
+                                                ? 'bg-red-600 text-white hover:bg-red-700' 
+                                                : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                        }`}
+                                        onClick={() => user?.rol === 'ADMIN' && navigate(`#`)}
+                                        disabled={user?.rol !== 'ADMIN'}
+                                        title={user?.rol !== 'ADMIN' ? 'Solo administradores pueden procesar desembolsos' : ''}
                                     >
                                         SOLICITUD EN PROCESO DE DESEMBOLSO
                                     </button>

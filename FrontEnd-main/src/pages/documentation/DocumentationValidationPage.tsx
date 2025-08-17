@@ -1,6 +1,7 @@
 // src/pages/documentation/DocumentationValidationPage.tsx
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
 import {
     listDocuments,
@@ -20,8 +21,14 @@ console.log("💥 DocumentService API base →", API);
 
 
 export default function DocumentationValidationPage() {
+    const { user } = useAuth();
     const { numeroSolicitud } = useParams<{ numeroSolicitud: string }>();
     const navigate = useNavigate();
+
+    // Función para verificar permisos de validación
+    const canValidate = () => {
+        return user?.rol === 'ADMIN' || user?.rol === 'ANALISTA';
+    };
 
     const [docs, setDocs] = useState<DocumentoDTO[]>([]);
     const [loading, setLoading] = useState(false);
@@ -161,22 +168,30 @@ export default function DocumentationValidationPage() {
                             </button>
                             {d.estado === 'CARGADO' && (
                                 <div className="flex items-center gap-2">
-                                    <button
-                                        onClick={() => handleApprove(d.id)}
-                                        className="inline-flex items-center px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition"
-                                        title="Aprobar documento"
-                                    >
-                                        <Check className="w-4 h-4 mr-1" />
-                                        Aprobar
-                                    </button>
-                                    <button
-                                        onClick={() => startReject(d.id)}
-                                        className="inline-flex items-center px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition"
-                                        title="Rechazar documento"
-                                    >
-                                        <X className="w-4 h-4 mr-1" />
-                                        Rechazar
-                                    </button>
+                                    {canValidate() ? (
+                                        <>
+                                            <button
+                                                onClick={() => handleApprove(d.id)}
+                                                className="inline-flex items-center px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition"
+                                                title="Aprobar documento"
+                                            >
+                                                <Check className="w-4 h-4 mr-1" />
+                                                Aprobar
+                                            </button>
+                                            <button
+                                                onClick={() => startReject(d.id)}
+                                                className="inline-flex items-center px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition"
+                                                title="Rechazar documento"
+                                            >
+                                                <X className="w-4 h-4 mr-1" />
+                                                Rechazar
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <span className="text-sm text-gray-500 italic">
+                                            Solo analistas y administradores pueden validar
+                                        </span>
+                                    )}
                                 </div>
                             )}
                             {d.estado === 'VALIDADO' && (
@@ -247,13 +262,21 @@ export default function DocumentationValidationPage() {
 
             {/* Botón para validar toda la solicitud */}
             {(aprobados + rechazados) === total && total > 0 && (
-                <button
-                    onClick={handleValidateAll}
-                    className={`mt-6 px-4 py-2 rounded text-white ${rechazados > 0 ? 'bg-red-600' : 'bg-green-600'}`}
-                >
-                    {rechazados > 0 ? 'Registrar Rechazo de Solicitud'
-                        : 'Registrar Aprobación de Solicitud'}
-                </button>
+                canValidate() ? (
+                    <button
+                        onClick={handleValidateAll}
+                        className={`mt-6 px-4 py-2 rounded text-white ${rechazados > 0 ? 'bg-red-600' : 'bg-green-600'}`}
+                    >
+                        {rechazados > 0 ? 'Registrar Rechazo de Solicitud'
+                            : 'Registrar Aprobación de Solicitud'}
+                    </button>
+                ) : (
+                    <div className="mt-6 p-4 bg-gray-100 rounded text-center">
+                        <p className="text-gray-600">
+                            Solo analistas y administradores pueden registrar la aprobación/rechazo de la solicitud
+                        </p>
+                    </div>
+                )
             )}
 
         </div>

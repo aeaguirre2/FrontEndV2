@@ -5,7 +5,7 @@ import UnauthorizedMessage from './UnauthorizedMessage';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'ADMIN' | 'VENDEDOR';
+  requiredRole?: 'ADMIN' | 'VENDEDOR' | 'ANALISTA';
   fallbackPath?: string;
 }
 

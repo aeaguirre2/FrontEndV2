@@ -15,7 +15,7 @@ const UserManagementPage: React.FC = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    rol: 'VENDEDOR' as 'ADMIN' | 'VENDEDOR',
+    rol: 'VENDEDOR' as 'ADMIN' | 'VENDEDOR' | 'ANALISTA',
     activo: true,
   });
 
@@ -50,7 +50,7 @@ const UserManagementPage: React.FC = () => {
       setFormData({
         email: '',
         password: '',
-        rol: 'VENDEDOR',
+        rol: 'VENDEDOR' as 'ADMIN' | 'VENDEDOR' | 'ANALISTA',
         activo: true,
       });
       loadUsers();
@@ -76,7 +76,7 @@ const UserManagementPage: React.FC = () => {
       setFormData({
         email: '',
         password: '',
-        rol: 'VENDEDOR',
+        rol: 'VENDEDOR' as 'ADMIN' | 'VENDEDOR' | 'ANALISTA',
         activo: true,
       });
       loadUsers();
@@ -121,7 +121,7 @@ const UserManagementPage: React.FC = () => {
     setFormData({
       email: '',
       password: '',
-      rol: 'VENDEDOR',
+      rol: 'VENDEDOR' as 'ADMIN' | 'VENDEDOR' | 'ANALISTA',
       activo: true,
     });
   };
@@ -205,11 +205,12 @@ const UserManagementPage: React.FC = () => {
                     </label>
                     <select
                       value={formData.rol}
-                      onChange={(e) => setFormData({ ...formData, rol: e.target.value as 'ADMIN' | 'VENDEDOR' })}
+                      onChange={(e) => setFormData({ ...formData, rol: e.target.value as 'ADMIN' | 'VENDEDOR' | 'ANALISTA' })}
                       className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                     >
                       <option value="VENDEDOR">Vendedor</option>
                       <option value="ADMIN">Administrador</option>
+                      <option value="ANALISTA">Analista</option>
                     </select>
                     {formData.rol === 'VENDEDOR' && (
                       <p className="mt-1 text-sm text-gray-500">
@@ -275,6 +276,8 @@ const UserManagementPage: React.FC = () => {
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                           user.rol === 'ADMIN' 
                             ? 'bg-red-100 text-red-800' 
+                            : user.rol === 'ANALISTA'
+                            ? 'bg-blue-100 text-blue-800'
                             : 'bg-green-100 text-green-800'
                         }`}>
                           {user.rol}

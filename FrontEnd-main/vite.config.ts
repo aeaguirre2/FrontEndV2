@@ -7,6 +7,14 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5173,
     cors: true,
+    proxy: {
+      '/api/analisis': {
+        target: 'http://localhost',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api\/analisis/, '/api/analisis')
+      }
+    }
   },
   preview: {
     host: '0.0.0.0',

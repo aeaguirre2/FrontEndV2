@@ -1,6 +1,7 @@
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
+  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost',
+  VERSION: import.meta.env.VITE_API_VERSION || 'v1',
   TIMEOUT: 30000,
   RETRY_ATTEMPTS: 3,
   RETRY_DELAY: 1000,
@@ -9,27 +10,27 @@ export const API_CONFIG = {
 // Microservices endpoints - Sistema de Préstamos Automotrices
 export const MICROSERVICES = {
   // Análisis Services
-  ORIGINACION: import.meta.env.VITE_ORIGINACION_SERVICE_URL || 'http://localhost:8080',
-  VEHICULOS: import.meta.env.VITE_VEHICULOS_SERVICE_URL || 'http://localhost:8080',
-  FORMALIZACION: import.meta.env.VITE_FORMALIZACION_SERVICE_URL || 'http://localhost:8080',
+  ORIGINACION: import.meta.env.VITE_ORIGINACION_SERVICE_URL || 'http://localhost',
+  VEHICULOS: import.meta.env.VITE_VEHICULOS_SERVICE_URL || 'http://localhost',
+  FORMALIZACION: import.meta.env.VITE_FORMALIZACION_SERVICE_URL || 'http://localhost',
   
   // Core Services
-  GENERAL: import.meta.env.VITE_GENERAL_SERVICE_URL || 'http://localhost:8080',
-  CLIENTES: import.meta.env.VITE_CLIENTES_SERVICE_URL || 'http://localhost:8080',
-  CUENTAS_CONFIG: import.meta.env.VITE_CUENTAS_CONFIG_SERVICE_URL || 'http://localhost:8080',
-  CUENTAS_TRANS: import.meta.env.VITE_CUENTAS_TRANS_SERVICE_URL || 'http://localhost:8080',
-  TRANSACCIONES: import.meta.env.VITE_TRANSACCIONES_SERVICE_URL || 'http://localhost:8080',
-  CATALOG: import.meta.env.VITE_CATALOG_SERVICE_URL || 'http://localhost:8080',
+  GENERAL: import.meta.env.VITE_GENERAL_SERVICE_URL || 'http://localhost',
+  CLIENTES: import.meta.env.VITE_CLIENTES_SERVICE_URL || 'http://localhost',
+  CUENTAS_CONFIG: import.meta.env.VITE_CUENTAS_CONFIG_SERVICE_URL || 'http://localhost',
+  CUENTAS_TRANS: import.meta.env.VITE_CUENTAS_TRANS_SERVICE_URL || 'http://localhost:8085',
+  TRANSACCIONES: import.meta.env.VITE_TRANSACCIONES_SERVICE_URL || 'http://localhost:8085',
+  CATALOG: import.meta.env.VITE_CATALOG_SERVICE_URL || 'http://localhost',
   
   // Legacy compatibility
-  VEHICLES: import.meta.env.VITE_VEHICULOS_SERVICE_URL || 'http://localhost:8080',
-  CREDIT_PRODUCTS: import.meta.env.VITE_CATALOG_SERVICE_URL || 'http://localhost:8080',
-  SIMULATION: import.meta.env.VITE_ORIGINACION_SERVICE_URL || 'http://localhost:8080',
-  LOANS: import.meta.env.VITE_ORIGINACION_SERVICE_URL || 'http://localhost:8080',
-  ANALYSIS: import.meta.env.VITE_ORIGINACION_SERVICE_URL || 'http://localhost:8080',
-  CONTRACTS: import.meta.env.VITE_FORMALIZACION_SERVICE_URL || 'http://localhost:8080',
-  INTEREST: import.meta.env.VITE_CATALOG_SERVICE_URL || 'http://localhost:8080',
-  NOTIFICATIONS: import.meta.env.VITE_GENERAL_SERVICE_URL || 'http://localhost:8080',
+  VEHICLES: import.meta.env.VITE_VEHICULOS_SERVICE_URL || 'http://localhost',
+  CREDIT_PRODUCTS: import.meta.env.VITE_CATALOG_SERVICE_URL || 'http://localhost',
+  SIMULATION: import.meta.env.VITE_ORIGINACION_SERVICE_URL || 'http://localhost',
+  LOANS: import.meta.env.VITE_ORIGINACION_SERVICE_URL || 'http://localhost',
+  ANALYSIS: import.meta.env.VITE_ORIGINACION_SERVICE_URL || 'http://localhost',
+  CONTRACTS: import.meta.env.VITE_FORMALIZACION_SERVICE_URL || 'http://localhost',
+  INTEREST: import.meta.env.VITE_CATALOG_SERVICE_URL || 'http://localhost',
+  NOTIFICATIONS: import.meta.env.VITE_GENERAL_SERVICE_URL || 'http://localhost',
 } as const;
 
 // Pagination
@@ -58,9 +59,13 @@ export const ROUTES = {
   LOANS: '/loans',
   ANALYSIS: '/analysis',
   CONTRACTS: '/contracts',
+  DOCUMENTATION: '/documentation',
+  DESEMBOLSOS: '/desembolsos',
   SETTINGS: '/settings',
   NOT_FOUND: '/404',
   CONCESIONARIOS: '/concesionarios',
+  RIESGO_CREDITO: '/riesgo-credito',
+  RIESGO_CREDITO_ADMIN: '/riesgo-credito/admin',
 } as const;
 
 // Validation

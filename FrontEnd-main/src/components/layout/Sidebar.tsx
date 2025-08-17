@@ -95,9 +95,27 @@ const Sidebar: React.FC<{ isCollapsed: boolean; onToggle: () => void }> = ({ isC
           roles: ['ADMIN'],
         },
         {
+          label: 'Riesgo Crediticio',
+          href: ROUTES.RIESGO_CREDITO,
+          icon: '🛡️',
+          roles: ['ADMIN'],
+        },
+        {
           label: 'Contratos',
           href: ROUTES.CONTRACTS,
           icon: '📑',
+          roles: ['ADMIN'],
+        },
+        {
+          label: 'Documentación',
+          href: '/documentation',
+          icon: '📂',
+          roles: ['ADMIN', 'VENDEDOR']
+        },
+        {
+          label: 'Desembolsos',
+          href: ROUTES.DESEMBOLSOS,
+          icon: '💰',
           roles: ['ADMIN'],
         },
       ];
@@ -130,9 +148,27 @@ const Sidebar: React.FC<{ isCollapsed: boolean; onToggle: () => void }> = ({ isC
           roles: ['VENDEDOR'],
         },
         {
+          label: 'Riesgo Crediticio',
+          href: ROUTES.RIESGO_CREDITO,
+          icon: '🛡️',
+          roles: ['VENDEDOR'],
+        },
+        {
           label: 'Contratos',
           href: ROUTES.CONTRACTS,
           icon: '📑',
+          roles: ['VENDEDOR'],
+        },
+        {
+          label: 'Documentación',
+          href: '/documentation',
+          icon: '📂',
+          roles: ['ADMIN', 'VENDEDOR']
+        },
+        {
+          label: 'Desembolsos',
+          href: ROUTES.DESEMBOLSOS,
+          icon: '💰',
           roles: ['VENDEDOR'],
         },
       ];

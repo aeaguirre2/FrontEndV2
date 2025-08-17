@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import AppLayout from '../components/layout/AppLayout';
 import ProtectedRoute from '../components/ProtectedRoute';
+import { ROUTES } from '../constants';
 
 // Pages
 import DashboardPage from '../pages/DashboardPage';
@@ -30,6 +31,10 @@ import LoansPage from '../pages/loans/LoansPage';
 // Analysis
 import AnalysisPage from '../pages/analysis/AnalysisPage';
 
+// Riesgo Crediticio
+import RiesgoCreditoPage from '../pages/riesgo-credito/RiesgoCreditoPage';
+import RiesgoCreditoAdminPage from '../pages/riesgo-credito/RiesgoCreditoAdminPage';
+
 // Contracts
 import ContractsPage from '../pages/contracts/ContractsPage';
 
@@ -38,6 +43,16 @@ import ConcesionariosPage from '../pages/concesionarios/ConcesionariosPage';
 
 // Vendedores
 import VendedoresPage from '../pages/vendedores/VendedoresPage';
+
+// Documentation
+import DocumentationPage from '../pages/documentation/DocumentationPage';
+import DocumentationListPage from '../pages/documentation/DocumentationListPage';
+import DocumentationValidationPage from '../pages/documentation/DocumentationValidationPage';
+import ContractUploadPage from '../pages/documentation/ContractUploadPage';
+import ContractsValidationPage from '../pages/documentation/ContractsValidationPage';
+
+// Desembolsos
+import DesembolsosPage from '../pages/desembolsos/DesembolsosPage';
 
 const AppRoutes: React.FC = () => {
   return (
@@ -159,6 +174,29 @@ const AppRoutes: React.FC = () => {
         } 
       />
       
+      {/* Riesgo Crediticio */}
+      <Route 
+        path={ROUTES.RIESGO_CREDITO} 
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <RiesgoCreditoPage />
+            </AppLayout>
+          </ProtectedRoute>
+        } 
+      />
+      
+      <Route 
+        path={ROUTES.RIESGO_CREDITO_ADMIN} 
+        element={
+          <ProtectedRoute requiredRole="ADMIN">
+            <AppLayout>
+              <RiesgoCreditoAdminPage />
+            </AppLayout>
+          </ProtectedRoute>
+        } 
+      />
+      
       {/* Contracts */}
       <Route 
         path="/contracts" 
@@ -190,6 +228,61 @@ const AppRoutes: React.FC = () => {
           <ProtectedRoute>
             <AppLayout>
               <VendedoresPage />
+            </AppLayout>
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* Documentation */}
+      {/* 1. Listado de solicitudes */}
+      <Route
+        path="/documentation"
+        element={<ProtectedRoute><AppLayout><DocumentationListPage /></AppLayout></ProtectedRoute>}
+      />
+      {/* 2. Subir los 3 docs */}
+      <Route
+        path="/documentation/:numeroSolicitud"
+        element={
+          <ProtectedRoute requiredRole="ADMIN">
+            <AppLayout><DocumentationPage /></AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      {/* 3. Validar los 3 docs */}
+      <Route
+        path="/documentation/:numeroSolicitud/validacion"
+        element={
+          <ProtectedRoute requiredRole="ADMIN">
+            <AppLayout><DocumentationValidationPage /></AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      {/* 4. Subir contrato y pagaré */}
+      <Route
+        path="/documentation/:numeroSolicitud/contratos"
+        element={
+          <ProtectedRoute requiredRole="ADMIN">
+            <AppLayout><ContractUploadPage /></AppLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* 5. Validar contrato y pagaré */}
+      <Route path="/documentation/:numeroSolicitud/contratos/validacion"
+        element={
+          <ProtectedRoute requiredRole="ADMIN">
+            <AppLayout><ContractsValidationPage /></AppLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Desembolsos */}
+      <Route 
+        path="/desembolsos" 
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <DesembolsosPage />
             </AppLayout>
           </ProtectedRoute>
         } 

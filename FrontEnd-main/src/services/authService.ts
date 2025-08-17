@@ -1,8 +1,9 @@
 import apiService from './api';
 import type { LoginRequest, LoginResponse, Usuario } from '../types/auth';
+import { API_CONFIG } from '../constants';
 
 class AuthService {
-  private readonly BASE_URL = '/api/auth';
+  private readonly BASE_URL = `/api/concesionarios/${API_CONFIG.VERSION}/auth`;
 
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     try {

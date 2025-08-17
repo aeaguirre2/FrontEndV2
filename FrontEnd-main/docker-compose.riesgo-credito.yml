@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  # Base de datos PostgreSQL
+  postgres:
+    image: postgres:15
+    container_name: riesgo-credito-postgres
+    environment:
+      POSTGRES_DB: riesgo_credito
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - riesgo-credito-network
+
+  # Backend de Riesgo Crediticio
+  riesgo-credito-backend:
+    build:
+      context: ../../RiesgoCredito-main
+      dockerfile: Dockerfile
+    container_name: riesgo-credito-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/riesgo_credito
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      CLIENTES_URL: http://3.145.79.87:8083
+      SERVER_PORT: 8081
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres
+    networks:
+      - riesgo-credito-network
+    restart: unless-stopped
+
+  # Frontend
+  riesgo-credito-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: riesgo-credito-frontend
+    environment:
+      VITE_RIESGO_CREDITO_SERVICE_URL: http://localhost:8081
+    ports:
+      - "3000:80"
+    depends_on:
+      - riesgo-credito-backend
+    networks:
+      - riesgo-credito-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  riesgo-credito-network:
+    driver: bridge

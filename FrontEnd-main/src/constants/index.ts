@@ -14,7 +14,7 @@ export const MICROSERVICES = {
   CONCESIONARIOS: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/vehiculos',
   
   // Análisis Services
-  ORIGINACION: 'http://localhost:81',
+  ORIGINACION: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com',
   FORMALIZACION: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/vehiculos',
   
   // Documentación Service (puerto 84)
@@ -28,7 +28,7 @@ export const MICROSERVICES = {
   CLIENTES: 'http://localhost:83/api/clientes',
   CUENTAS_CONFIG: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/vehiculos',
   CUENTAS_TRANS: 'http://localhost:8085',
-  CATALOG: 'http://localhost:82/api/catalogo',
+  CATALOG: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/catalogo',
   
   // Legacy compatibility
   VEHICLES: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/vehiculos',
@@ -41,7 +41,7 @@ export const MICROSERVICES = {
   NOTIFICATIONS: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/vehiculos',
   
   // Riesgo Crediticio (puerto 80) - Backend separado
-  RIESGO_CREDITO: 'http://localhost:80',
+  RIESGO_CREDITO: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com',
 } as const;
 
 // Pagination

@@ -577,7 +577,7 @@ const LoansPage: React.FC = () => {
       console.log('🔄 Cargando información del vendedor con email:', user.email);
       
       // Paso 1: Obtener información del concesionario usando el email del vendedor
-      const concesionarioResponse = await fetch(`http://localhost:8080/api/concesionarios/v1/vendedor-email/${user.email}`);
+      const concesionarioResponse = await fetch(`http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/vehiculos/api/concesionarios/v1/vendedor-email/${user.email}`);
       
       if (!concesionarioResponse.ok) {
         throw new Error(`Error al obtener concesionario: ${concesionarioResponse.statusText}`);
@@ -588,7 +588,7 @@ const LoansPage: React.FC = () => {
       setConcesionarioInfo(concesionarioData);
       
       // Paso 2: Obtener información del vendedor usando RUC y email
-      const vendedorResponse = await fetch(`http://localhost:8080/api/concesionarios/v1/ruc/${concesionarioData.ruc}/vendedores/email/${encodeURIComponent(user.email)}`);
+      const vendedorResponse = await fetch(`http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/vehiculos/api/concesionarios/v1/ruc/${concesionarioData.ruc}/vendedores/email/${encodeURIComponent(user.email)}`);
       
       if (!vendedorResponse.ok) {
         throw new Error(`Error al obtener vendedor: ${vendedorResponse.statusText}`);

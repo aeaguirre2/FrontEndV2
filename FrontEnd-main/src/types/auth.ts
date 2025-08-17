@@ -6,7 +6,7 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   mensaje: string;
-  rol: 'ADMIN' | 'VENDEDOR';
+  rol: 'ADMIN' | 'VENDEDOR' | 'ANALISTA';
   vendedorId?: string;
   concesionarioId?: string;
   email: string;
@@ -16,7 +16,7 @@ export interface Usuario {
   id?: string;
   email: string;
   password?: string;
-  rol: 'ADMIN' | 'VENDEDOR';
+  rol: 'ADMIN' | 'VENDEDOR' | 'ANALISTA';
   vendedorId?: string;
   concesionarioId?: string;
   activo: boolean;

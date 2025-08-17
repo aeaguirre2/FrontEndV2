@@ -52,21 +52,13 @@ export interface EgresosExternoDto {
 }
 
 class RiesgoCreditoService {
-  private baseURL = '';
+  private baseURL = import.meta.env.VITE_RIESGO_CREDITO_SERVICE_URL || 'http://localhost:8081';
   private apiPath = '/api/analisis/v1';
 
   async consultarPorCedula(cedula: string): Promise<ConsultaBuroCreditoResponse> {
     try {
-      console.log('🌐 Haciendo petición a:', `${this.baseURL}${this.apiPath}/consulta-por-cedula/${cedula}`);
       const response = await api.get(`${this.baseURL}${this.apiPath}/consulta-por-cedula/${cedula}`);
-      console.log('📡 Respuesta completa:', response);
-      console.log('📄 Datos de la respuesta:', response.data);
-      
-      // Verificar si los datos están en response.data o directamente en response
-      const datos = response.data || response;
-      console.log('🎯 Datos finales a retornar:', datos);
-      
-      return datos;
+      return response.data;
     } catch (error) {
       console.error('Error al consultar riesgo crediticio:', error);
       throw error;

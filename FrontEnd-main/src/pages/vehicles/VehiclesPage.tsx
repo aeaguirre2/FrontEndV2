@@ -107,21 +107,27 @@ const VehiclesPage: React.FC = () => {
           const vehs = await getVehiculosByRuc(userConcesionario.ruc);
           console.log('Vehículos encontrados para concesionario:', userConcesionario.ruc, vehs);
           
-          allVehs = vehs.map((v: any) => ({
-            ...v,
-            make: v.marca || '',
-            model: v.modelo || '',
-            year: v.anio || '',
-            price: v.valor || 0,
-            type: v.tipo || '',
-            category: v.condicion || '',
-            fuelType: v.combustible || '',
-            isAvailable: v.estado === 'ACTIVO' || v.estado === 'DISPONIBLE',
-            placa: v.identificadorVehiculo?.placa || '',
-            chasis: v.identificadorVehiculo?.chasis || '',
-            motor: v.identificadorVehiculo?.motor || '',
-            concesionario: userConcesionario.ruc
-          }));
+          allVehs = vehs.map((v: any) => {
+            console.log('Vehículo original:', v);
+            console.log('Condición del vehículo:', v.condicion);
+            const mappedVehicle = {
+              ...v,
+              make: v.marca || '',
+              model: v.modelo || '',
+              year: v.anio || '',
+              price: v.valor || 0,
+              type: v.tipo || '',
+              category: v.condicion || '',
+              fuelType: v.combustible || '',
+              isAvailable: v.estado === 'ACTIVO' || v.estado === 'DISPONIBLE',
+              placa: v.identificadorVehiculo?.placa || '',
+              chasis: v.identificadorVehiculo?.chasis || '',
+              motor: v.identificadorVehiculo?.motor || '',
+              concesionario: userConcesionario.ruc
+            };
+            console.log('Vehículo mapeado:', mappedVehicle);
+            return mappedVehicle;
+          });
         } catch (error) {
           console.error('Error al obtener concesionario o vehículos del vendedor:', error);
           addToast({
@@ -188,22 +194,39 @@ const VehiclesPage: React.FC = () => {
     }).format(price);
   };
 
-  const getTypeBadge = (type: VehicleType) => {
-    const typeStyles = {
-      CAR: 'bg-blue-100 text-blue-800',
+  const getTypeBadge = (type: string) => {
+    console.log('getTypeBadge recibió tipo:', type);
+    // Mapear tipos del backend a estilos y etiquetas
+    const typeStyles: { [key: string]: string } = {
+      // Tipos del backend (español)
+      SEDAN: 'bg-blue-100 text-blue-800',
       SUV: 'bg-green-100 text-green-800',
+      CAMIONETA: 'bg-orange-100 text-orange-800',
+      AUTOMOVIL: 'bg-purple-100 text-purple-800',
+      // Tipos del frontend (inglés) - mantener compatibilidad
+      CAR: 'bg-blue-100 text-blue-800',
       TRUCK: 'bg-orange-100 text-orange-800',
       MOTORCYCLE: 'bg-purple-100 text-purple-800',
       VAN: 'bg-gray-100 text-gray-800',
     };
 
-    const typeLabels = {
-      CAR: 'Automóvil',
+    const typeLabels: { [key: string]: string } = {
+      // Tipos del backend (español)
+      SEDAN: 'Sedán',
       SUV: 'SUV',
+      CAMIONETA: 'Camioneta',
+      AUTOMOVIL: 'Automóvil',
+      // Tipos del frontend (inglés) - mantener compatibilidad
+      CAR: 'Automóvil',
       TRUCK: 'Camioneta',
       MOTORCYCLE: 'Motocicleta',
       VAN: 'Van',
     };
+
+    // Si no hay tipo o no está mapeado, no mostrar badge
+    if (!type || !typeStyles[type]) {
+      return null;
+    }
 
     return (
       <span className={`px-2 py-1 text-xs font-medium rounded-full ${typeStyles[type]}`}>
@@ -212,18 +235,34 @@ const VehiclesPage: React.FC = () => {
     );
   };
 
-  const getCategoryBadge = (category: VehicleCategory) => {
-    const categoryStyles = {
+  const getCategoryBadge = (category: string) => {
+    console.log('getCategoryBadge recibió categoría:', category);
+    
+    // Mapear condiciones del backend a estilos y etiquetas
+    const categoryStyles: { [key: string]: string } = {
+      // Condiciones del backend (español)
+      NUEVO: 'bg-green-100 text-green-800',
+      USADO: 'bg-yellow-100 text-yellow-800',
+      // Categorías del frontend (inglés) - mantener compatibilidad
       NEW: 'bg-green-100 text-green-800',
       USED: 'bg-yellow-100 text-yellow-800',
       CERTIFIED: 'bg-blue-100 text-blue-800',
     };
 
-    const categoryLabels = {
+    const categoryLabels: { [key: string]: string } = {
+      // Condiciones del backend (español)
+      NUEVO: 'Nuevo',
+      USADO: 'Usado',
+      // Categorías del frontend (inglés) - mantener compatibilidad
       NEW: 'Nuevo',
       USED: 'Usado',
       CERTIFIED: 'Certificado',
     };
+
+    // Si no hay categoría o no está mapeada, no mostrar badge
+    if (!category || !categoryStyles[category]) {
+      return null;
+    }
 
     return (
       <span className={`px-2 py-1 text-xs font-medium rounded-full ${categoryStyles[category]}`}>

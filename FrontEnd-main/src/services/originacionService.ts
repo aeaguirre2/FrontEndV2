@@ -4,27 +4,6 @@ import type {
   SimulacionCreditoRequestDTO, 
   SimulacionCreditoResponseDTO 
 } from '../types/automotive-loan';
-import type { AxiosResponse } from 'axios';
-
-export interface SolicitudResumenDTO {
-  idSolicitud: string;
-  numeroSolicitud: string;
-  estado: string;
-  fechaSolicitud: string; // ISO date
-  montoSolicitado: number;
-  plazoMeses: number;
-  placaVehiculo: string;
-}
-
-export interface PaginaSolicitudes {
-  solicitudes: SolicitudResumenDTO[];
-  paginaActual: number;
-  tamanoPagina: number;
-  totalElementos: number;
-  totalPaginas: number;
-  tieneSiguiente: boolean;
-  tieneAnterior: boolean;
-}
 
 class OriginacionService {
   private baseUrl = MICROSERVICES.ORIGINACION;
@@ -50,18 +29,6 @@ class OriginacionService {
   async registrarClienteProspecto(data: any) {
     const response = await this.client.post('/api/v1/clientes', data);
     return response.data;
-  }
-
-  /** Este método reemplaza a tu función suelta */
-  async fetchSolicitudesPorFechas(
-    fechaInicio: string,
-    fechaFin: string,
-    estado?: string
-  ): Promise<AxiosResponse<PaginaSolicitudes>> {
-    return this.client.post<PaginaSolicitudes>(
-      `/api/v1/solicitudes/consultar-por-fechas`,
-      { fechaInicio, fechaFin, estado, pagina: 0, tamanoPagina: 20 }
-    );
   }
 }
 

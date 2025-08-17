@@ -1,6 +1,6 @@
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost',
+  BASE_URL: 'http://localhost:8080',
   VERSION: import.meta.env.VITE_API_VERSION || 'v1',
   TIMEOUT: 30000,
   RETRY_ATTEMPTS: 3,
@@ -9,28 +9,35 @@ export const API_CONFIG = {
 
 // Microservices endpoints - Sistema de Préstamos Automotrices
 export const MICROSERVICES = {
-  // Análisis Services
-  ORIGINACION: import.meta.env.VITE_ORIGINACION_SERVICE_URL || 'http://localhost',
-  VEHICULOS: import.meta.env.VITE_VEHICULOS_SERVICE_URL || 'http://localhost',
-  FORMALIZACION: import.meta.env.VITE_FORMALIZACION_SERVICE_URL || 'http://localhost',
+  // Gestión Vehículos (puerto 8080) - Para login y gestión de vehículos
+  VEHICULOS: 'http://localhost:8080',
+  CONCESIONARIOS: 'http://localhost:8080',
   
-  // Core Services
-  GENERAL: import.meta.env.VITE_GENERAL_SERVICE_URL || 'http://localhost',
-  CLIENTES: import.meta.env.VITE_CLIENTES_SERVICE_URL || 'http://localhost',
-  CUENTAS_CONFIG: import.meta.env.VITE_CUENTAS_CONFIG_SERVICE_URL || 'http://localhost',
-  CUENTAS_TRANS: import.meta.env.VITE_CUENTAS_TRANS_SERVICE_URL || 'http://localhost:8085',
-  TRANSACCIONES: import.meta.env.VITE_TRANSACCIONES_SERVICE_URL || 'http://localhost:8085',
-  CATALOG: import.meta.env.VITE_CATALOG_SERVICE_URL || 'http://localhost',
+  // Análisis Services
+  ORIGINACION: 'http://localhost:8080',
+  FORMALIZACION: 'http://localhost:8080',
+  
+                // Core Services
+              GENERAL: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/general',
+              CLIENTES: 'http://localhost:83/api/clientes',
+              CUENTAS_CONFIG: 'http://localhost:8080',
+              CUENTAS_TRANS: 'http://localhost:8085',
+              TRANSACCIONES: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/prestamos',
+              CATALOG: 'http://localhost:82/api/catalogo',
+              ORIGINACION: 'http://localhost:81',
   
   // Legacy compatibility
-  VEHICLES: import.meta.env.VITE_VEHICULOS_SERVICE_URL || 'http://localhost',
-  CREDIT_PRODUCTS: import.meta.env.VITE_CATALOG_SERVICE_URL || 'http://localhost',
-  SIMULATION: import.meta.env.VITE_ORIGINACION_SERVICE_URL || 'http://localhost',
-  LOANS: import.meta.env.VITE_ORIGINACION_SERVICE_URL || 'http://localhost',
-  ANALYSIS: import.meta.env.VITE_ORIGINACION_SERVICE_URL || 'http://localhost',
-  CONTRACTS: import.meta.env.VITE_FORMALIZACION_SERVICE_URL || 'http://localhost',
-  INTEREST: import.meta.env.VITE_CATALOG_SERVICE_URL || 'http://localhost',
-  NOTIFICATIONS: import.meta.env.VITE_GENERAL_SERVICE_URL || 'http://localhost',
+  VEHICLES: 'http://localhost:8080',
+  CREDIT_PRODUCTS: 'http://localhost:8080',
+  SIMULATION: 'http://localhost:8080',
+  LOANS: 'http://localhost:8080',
+  ANALYSIS: 'http://localhost:8080',
+  CONTRACTS: 'http://localhost:8080',
+  INTEREST: 'http://localhost:8080',
+  NOTIFICATIONS: 'http://localhost:8080',
+  
+  // Riesgo Crediticio (puerto 80) - Backend separado
+  RIESGO_CREDITO: 'http://localhost:80',
 } as const;
 
 // Pagination
@@ -57,6 +64,8 @@ export const ROUTES = {
   PRODUCTS_INTEREST: '/products/interest',
   CREDIT_SIMULATION: '/credit-simulation',
   LOANS: '/loans',
+  LOANS_CREATE: '/loans/create',
+  LOANS_SIMULATE: '/loans/simulate',
   ANALYSIS: '/analysis',
   CONTRACTS: '/contracts',
   DOCUMENTATION: '/documentation',

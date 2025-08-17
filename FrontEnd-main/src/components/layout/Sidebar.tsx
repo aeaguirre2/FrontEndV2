@@ -89,15 +89,9 @@ const Sidebar: React.FC<{ isCollapsed: boolean; onToggle: () => void }> = ({ isC
           roles: ['ADMIN'],
         },
         {
-          label: 'Análisis Crediticio',
-          href: ROUTES.ANALYSIS,
-          icon: '🔍',
-          roles: ['ADMIN'],
-        },
-        {
           label: 'Riesgo Crediticio',
           href: ROUTES.RIESGO_CREDITO,
-          icon: '🛡️',
+          icon: '🔍',
           roles: ['ADMIN'],
         },
         {
@@ -142,15 +136,9 @@ const Sidebar: React.FC<{ isCollapsed: boolean; onToggle: () => void }> = ({ isC
           roles: ['VENDEDOR'],
         },
         {
-          label: 'Análisis Crediticio',
-          href: ROUTES.ANALYSIS,
-          icon: '🔍',
-          roles: ['VENDEDOR'],
-        },
-        {
           label: 'Riesgo Crediticio',
           href: ROUTES.RIESGO_CREDITO,
-          icon: '🛡️',
+          icon: '🔍',
           roles: ['VENDEDOR'],
         },
         {

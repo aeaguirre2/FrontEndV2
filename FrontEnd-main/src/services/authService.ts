@@ -1,13 +1,13 @@
-import apiService from './api';
+import { api } from './api';
 import type { LoginRequest, LoginResponse, Usuario } from '../types/auth';
-import { API_CONFIG } from '../constants';
+import { MICROSERVICES } from '../constants';
 
 class AuthService {
-  private readonly BASE_URL = `/api/concesionarios/${API_CONFIG.VERSION}/auth`;
+  private readonly BASE_URL = `${MICROSERVICES.CONCESIONARIOS}/api/concesionarios/v1/auth`;
 
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     try {
-      const response = await apiService.post<LoginResponse>(`${this.BASE_URL}/login`, credentials);
+      const response = await api.post<LoginResponse>(`${this.BASE_URL}/login`, credentials);
       return response;
     } catch (error) {
       throw new Error('Error en el login. Verifica tus credenciales.');
@@ -16,7 +16,7 @@ class AuthService {
 
   async getCurrentUser(email: string): Promise<Usuario> {
     try {
-      const response = await apiService.get<Usuario>(`${this.BASE_URL}/usuarios/email/${email}`);
+      const response = await api.get<Usuario>(`${this.BASE_URL}/usuarios/email/${email}`);
       return response;
     } catch (error) {
       throw new Error('Error al obtener el perfil del usuario.');
@@ -25,7 +25,7 @@ class AuthService {
 
   async getAllUsers(): Promise<Usuario[]> {
     try {
-      const response = await apiService.get<Usuario[]>(`${this.BASE_URL}/usuarios`);
+      const response = await api.get<Usuario[]>(`${this.BASE_URL}/usuarios`);
       return response;
     } catch (error) {
       throw new Error('Error al obtener la lista de usuarios.');
@@ -34,7 +34,7 @@ class AuthService {
 
   async createUser(user: Omit<Usuario, 'id' | 'version'>): Promise<Usuario> {
     try {
-      const response = await apiService.post<Usuario>(`${this.BASE_URL}/usuarios`, user);
+      const response = await api.post<Usuario>(`${this.BASE_URL}/usuarios`, user);
       return response;
     } catch (error) {
       throw new Error('Error al crear el usuario.');
@@ -43,7 +43,7 @@ class AuthService {
 
   async updateUser(id: string, user: Partial<Usuario>): Promise<Usuario> {
     try {
-      const response = await apiService.put<Usuario>(`${this.BASE_URL}/usuarios/${id}`, user);
+      const response = await api.put<Usuario>(`${this.BASE_URL}/usuarios/${id}`, user);
       return response;
     } catch (error) {
       throw new Error('Error al actualizar el usuario.');
@@ -52,7 +52,7 @@ class AuthService {
 
   async deleteUser(id: string): Promise<void> {
     try {
-      await apiService.delete(`${this.BASE_URL}/usuarios/${id}`);
+      await api.delete(`${this.BASE_URL}/usuarios/${id}`);
     } catch (error) {
       throw new Error('Error al eliminar el usuario.');
     }
@@ -60,7 +60,7 @@ class AuthService {
 
   async updateProfile(user: Partial<Usuario>): Promise<Usuario> {
     try {
-      const response = await apiService.put<Usuario>(`${this.BASE_URL}/usuarios/${user.id}`, user);
+      const response = await api.put<Usuario>(`${this.BASE_URL}/usuarios/${user.id}`, user);
       return response;
     } catch (error) {
       throw new Error('Error al actualizar el perfil.');
@@ -91,6 +91,7 @@ class AuthService {
   // Método para guardar datos de autenticación
   storeAuthData(user: Usuario, token?: string): void {
     localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('userEmail', user.email); // Guardar email del usuario
     if (token) {
       localStorage.setItem('authToken', token);
     }
@@ -98,6 +99,7 @@ class AuthService {
 
   // Método para limpiar datos de autenticación
   clearAuthData(): void {
+    localStorage.removeItem('userEmail'); // Limpiar email del usuario
     localStorage.removeItem('user');
     localStorage.removeItem('authToken');
   }

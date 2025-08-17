@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, Info } from 'lucide-react';
+import { Shield, Info, AlertCircle } from 'lucide-react';
 import { riesgoCreditoService } from '../../services/riesgoCreditoService';
 import type { ConsultaBuroCreditoResponse } from '../../services/riesgoCreditoService';
 import { useToast } from '../../hooks/useToast';
@@ -8,6 +8,7 @@ const RiesgoCreditoPage: React.FC = () => {
   const [cedula, setCedula] = useState('12345678');
   const [isLoading, setIsLoading] = useState(false);
   const [consulta, setConsulta] = useState<ConsultaBuroCreditoResponse | null>(null);
+  const [clienteNoEncontrado, setClienteNoEncontrado] = useState(false);
   const { showToast } = useToast();
 
   const handleConsultar = async () => {
@@ -17,6 +18,9 @@ const RiesgoCreditoPage: React.FC = () => {
     }
 
     setIsLoading(true);
+    setClienteNoEncontrado(false);
+    setConsulta(null);
+    
     try {
       console.log('🔄 Iniciando consulta para cédula:', cedula);
       const resultado = await riesgoCreditoService.consultarPorCedula(cedula);
@@ -37,8 +41,15 @@ const RiesgoCreditoPage: React.FC = () => {
         response: error.response,
         status: error.response?.status
       });
-      const mensaje = error.response?.data || 'Error al consultar el riesgo crediticio';
-      showToast(mensaje, 'error');
+      
+      // Verificar si es un error 404 (cliente no encontrado)
+      if (error.response?.status === 404) {
+        setClienteNoEncontrado(true);
+        showToast('Cliente no encontrado. Verifique el número de cédula e intente nuevamente.', 'error');
+      } else {
+        const mensaje = error.response?.data || 'Error al consultar el riesgo crediticio';
+        showToast(mensaje, 'error');
+      }
     } finally {
       setIsLoading(false);
       console.log('🏁 Consulta finalizada');
@@ -283,6 +294,42 @@ const RiesgoCreditoPage: React.FC = () => {
                     </div>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Cliente No Encontrado Message */}
+            {clienteNoEncontrado && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+                <div className="flex flex-col items-center space-y-4">
+                  <AlertCircle className="w-16 h-16 text-red-500" />
+                  <div>
+                    <h3 className="text-lg font-semibold text-red-800 mb-2">
+                      Cliente No Encontrado
+                    </h3>
+                    <p className="text-red-700 mb-4">
+                      No se encontró información crediticia para la cédula <strong>{cedula}</strong>
+                    </p>
+                    <div className="text-sm text-red-600 space-y-2">
+                      <p>Posibles razones:</p>
+                      <ul className="list-disc list-inside space-y-1">
+                        <li>El número de cédula ingresado es incorrecto</li>
+                        <li>El cliente no tiene historial crediticio registrado</li>
+                        <li>La información no está disponible en el sistema</li>
+                      </ul>
+                    </div>
+                    <div className="mt-6">
+                      <button
+                        onClick={() => {
+                          setCedula('');
+                          setClienteNoEncontrado(false);
+                        }}
+                        className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors"
+                      >
+                        Intentar con otra cédula
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>

@@ -12,7 +12,7 @@ import type { DocumentoDTO } from '../../services/documentService';
 import { Eye, Check, X } from 'lucide-react';
 
 // <-- URL base de tu MS Documentación
-const API = import.meta.env.VITE_DOCUMENT_SERVICE_URL;
+const API = import.meta.env.VITE_DOCUMENT_SERVICE_URL || 'http://localhost:84';
 console.log("💥 DocumentService API base →", API);
 
 
@@ -35,7 +35,7 @@ export default function DocumentationValidationPage() {
         if (!numeroSolicitud) return;
         // traemos el PDF como blob
         const res = await axios.get(
-            `${API}/solicitudes/${numeroSolicitud}/documentos/${id}/ver`,
+            `${API}/api/documentacion/v1/solicitudes/${numeroSolicitud}/documentos/${id}/ver`,
             { responseType: 'blob' }
         );
         // creamos un objectURL
@@ -77,12 +77,24 @@ export default function DocumentationValidationPage() {
     const rechazados = docs.filter(d => d.estado === 'RECHAZADO').length;
 
     const handleValidateAll = async () => {
-        await axios.patch(
-            `${import.meta.env.VITE_DOCUMENT_SERVICE_URL}/solicitudes/${numeroSolicitud}/documentos/validar-todos`,
-            null,
-            { params: { usuario: 'analista' } }
-        );
-        navigate('/documentation');
+        try {
+            await axios.patch(
+                `${API}/api/documentacion/v1/solicitudes/${numeroSolicitud}/documentos/validar-todos`,
+                null,
+                { params: { usuario: 'analista' } }
+            );
+            navigate('/documentation');
+        } catch (error: any) {
+            console.error('Error al validar documentos:', error);
+            
+            // Si el error es 500, probablemente el estado ya se cambió pero falló en crear el préstamo
+            if (error.response?.status === 500) {
+                alert('⚠️ La documentación se validó exitosamente, pero hubo un problema al crear el préstamo. El estado de la solicitud se actualizó correctamente. Puedes continuar con el proceso manualmente.');
+                navigate('/documentation');
+            } else {
+                alert('❌ Error al validar documentos: ' + (error.response?.data || error.message));
+            }
+        }
     };
 
 

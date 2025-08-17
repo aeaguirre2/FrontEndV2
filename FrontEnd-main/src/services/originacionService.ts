@@ -5,6 +5,34 @@ import type {
   SimulacionCreditoResponseDTO 
 } from '../types/automotive-loan';
 
+export interface SolicitudConsultaRequestDTO {
+  fechaInicio: string;
+  fechaFin: string;
+  estado?: string;
+  cedulaVendedor?: string;
+  rucConcesionario?: string;
+  pagina?: number;
+  tamanoPagina?: number;
+}
+
+export interface SolicitudResumenDTO {
+  idSolicitud: number;
+  numeroSolicitud: string;
+  estado: string;
+  placaVehiculo: string;
+  montoSolicitado: number;
+}
+
+export interface SolicitudConsultaPaginadaResponseDTO {
+  solicitudes: SolicitudResumenDTO[];
+  pagina: number;
+  tamanoPagina: number;
+  totalElementos: number;
+  totalPaginas: number;
+  tieneSiguiente: boolean;
+  tieneAnterior: boolean;
+}
+
 class OriginacionService {
   private baseUrl = MICROSERVICES.ORIGINACION;
 
@@ -29,6 +57,21 @@ class OriginacionService {
   async registrarClienteProspecto(data: any) {
     const response = await this.client.post('/api/v1/clientes', data);
     return response.data;
+  }
+
+  async fetchSolicitudesPorFechas(fechaInicio: string, fechaFin: string): Promise<{data: SolicitudConsultaPaginadaResponseDTO}> {
+    const requestData: SolicitudConsultaRequestDTO = {
+      fechaInicio,
+      fechaFin,
+      pagina: 0,
+      tamanoPagina: 100
+    };
+    
+    const response = await this.client.post<SolicitudConsultaPaginadaResponseDTO>(
+      '/api/originacion/v1/solicitudes/consultar-por-fechas', 
+      requestData
+    );
+    return { data: response.data };
   }
 }
 

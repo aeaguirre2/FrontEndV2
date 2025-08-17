@@ -32,13 +32,25 @@ export default function DocumentationPage() {
 
   const onGuardarDocs = async () => {
     if (!numeroSolicitud || !todosListos) return;
-    for (let i = 0; i < 3; i++) {
-      await uploadDocument(numeroSolicitud, archivos[i]!, tipos[i])
-        .catch(err => console.error(`Error subiendo ${tipos[i]}:`, err));
+    
+    try {
+      // Subir los 3 documentos
+      for (let i = 0; i < 3; i++) {
+        await uploadDocument(numeroSolicitud, archivos[i]!, tipos[i])
+          .catch(err => console.error(`Error subiendo ${tipos[i]}:`, err));
+      }
+      
+      // Recargar la lista de documentos
+      const r = await listDocuments(numeroSolicitud);
+      setDocs(r.data);
+      
+      // El backend automáticamente actualiza el estado cuando se cargan 3 documentos
+      alert('Documentos cargados correctamente. El estado se actualizará automáticamente.');
+      
+    } catch (error) {
+      console.error('Error al guardar documentos:', error);
+      alert('Error al cargar documentos');
     }
-    const r = await listDocuments(numeroSolicitud);
-    setDocs(r.data);
-    alert('Documentos cargados correctamente');
   };
 
   return (
@@ -127,6 +139,8 @@ export default function DocumentationPage() {
       >
         Guardar Documentación
       </button>
+
+      
 
       <hr />
 

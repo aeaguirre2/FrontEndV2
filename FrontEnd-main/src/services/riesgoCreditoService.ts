@@ -1,4 +1,4 @@
-import { api } from './api';
+import axios from 'axios';
 
 export interface ConsultaBuroCreditoResponse {
   nombreCliente: string;
@@ -51,13 +51,17 @@ export interface EgresosExternoDto {
   fechaRegistro: string;
 }
 
+import { MICROSERVICES } from '../constants';
+
 class RiesgoCreditoService {
-  private baseURL = import.meta.env.VITE_RIESGO_CREDITO_SERVICE_URL || 'http://localhost:8081';
+  private baseURL = MICROSERVICES.RIESGO_CREDITO;
   private apiPath = '/api/analisis/v1';
 
   async consultarPorCedula(cedula: string): Promise<ConsultaBuroCreditoResponse> {
     try {
-      const response = await api.get(`${this.baseURL}${this.apiPath}/consulta-por-cedula/${cedula}`);
+      const response = await axios.get(`${this.baseURL}${this.apiPath}/consulta-por-cedula/${cedula}`);
+      console.log('🔍 Respuesta completa del backend:', response);
+      console.log('📊 Datos de la respuesta:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error al consultar riesgo crediticio:', error);
@@ -67,7 +71,7 @@ class RiesgoCreditoService {
 
   async sincronizarDesdeCore(): Promise<string> {
     try {
-      const response = await api.post(`${this.baseURL}${this.apiPath}/sincronizar-core`);
+      const response = await axios.post(`${this.baseURL}${this.apiPath}/sincronizar-core`);
       return response.data;
     } catch (error) {
       console.error('Error al sincronizar desde core:', error);
@@ -77,7 +81,7 @@ class RiesgoCreditoService {
 
   async contarPersonasCore(): Promise<number> {
     try {
-      const response = await api.get(`${this.baseURL}${this.apiPath}/count-core-personas`);
+      const response = await axios.get(`${this.baseURL}${this.apiPath}/count-core-personas`);
       return response.data;
     } catch (error) {
       console.error('Error al contar personas en core:', error);
@@ -87,7 +91,7 @@ class RiesgoCreditoService {
 
   async sincronizarInternoExterno(): Promise<string> {
     try {
-      const response = await api.post(`${this.baseURL}${this.apiPath}/sincronizar-interno-externo`);
+      const response = await axios.post(`${this.baseURL}${this.apiPath}/sincronizar-interno-externo`);
       return response.data;
     } catch (error) {
       console.error('Error al sincronizar interno-externo:', error);
@@ -97,7 +101,7 @@ class RiesgoCreditoService {
 
   async generarClientesExternos(cantidad: number): Promise<string> {
     try {
-      const response = await api.post(`${this.baseURL}${this.apiPath}/generar-clientes-externos/${cantidad}`);
+      const response = await axios.post(`${this.baseURL}${this.apiPath}/generar-clientes-externos/${cantidad}`);
       return response.data;
     } catch (error) {
       console.error('Error al generar clientes externos:', error);
@@ -107,7 +111,7 @@ class RiesgoCreditoService {
 
   async contarClientesInternos(): Promise<number> {
     try {
-      const response = await api.get(`${this.baseURL}${this.apiPath}/clientes-internos`);
+      const response = await axios.get(`${this.baseURL}${this.apiPath}/clientes-internos`);
       return response.data;
     } catch (error) {
       console.error('Error al contar clientes internos:', error);

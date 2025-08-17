@@ -14,7 +14,8 @@ import { Eye, Check, X } from 'lucide-react'
 import { validateAllContracts } from '../../services/documentService'
 
 
-const API = import.meta.env.VITE_DOCUMENT_SERVICE_URL
+const API = import.meta.env.VITE_DOCUMENT_SERVICE_URL || 'http://localhost:84'
+console.log("💥 DocumentService API base →", API);
 
 export default function ContractsValidationPage() {
     const { numeroSolicitud } = useParams<{ numeroSolicitud: string }>()
@@ -45,7 +46,7 @@ export default function ContractsValidationPage() {
     const handlePreview = async (id: string) => {
         if (!numeroSolicitud) return
         const res = await axios.get(
-            `${API}/solicitudes/${numeroSolicitud}/documentos/${id}/ver`,
+            `${API}/api/documentacion/v1/solicitudes/${numeroSolicitud}/documentos/${id}/ver`,
             { responseType: 'blob' }
         )
         setPreviewUrl(URL.createObjectURL(res.data))

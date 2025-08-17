@@ -37,7 +37,7 @@ export interface TransaccionSolicitud {
 }
 
 class TransactionService {
-  private baseUrl = MICROSERVICES.CUENTAS_TRANS;
+  private baseUrl = MICROSERVICES.TRANSACCIONES;
 
   // Realizar desembolso
   async realizarDesembolso(data: DesembolsoSolicitud): Promise<DesembolsoRespuesta> {

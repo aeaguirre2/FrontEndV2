@@ -14,17 +14,21 @@ export const MICROSERVICES = {
   CONCESIONARIOS: 'http://localhost:8080',
   
   // Análisis Services
-  ORIGINACION: 'http://localhost:8080',
+  ORIGINACION: 'http://localhost:81',
   FORMALIZACION: 'http://localhost:8080',
+  
+  // Documentación Service (puerto 84)
+  DOCUMENTACION: 'http://localhost:84',
+  
+  // Transacciones Service (puerto 85)
+  TRANSACCIONES: 'http://localhost:85',
   
                 // Core Services
               GENERAL: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/general',
               CLIENTES: 'http://localhost:83/api/clientes',
               CUENTAS_CONFIG: 'http://localhost:8080',
               CUENTAS_TRANS: 'http://localhost:8085',
-              TRANSACCIONES: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/prestamos',
               CATALOG: 'http://localhost:82/api/catalogo',
-              ORIGINACION: 'http://localhost:81',
   
   // Legacy compatibility
   VEHICLES: 'http://localhost:8080',

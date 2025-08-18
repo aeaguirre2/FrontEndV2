@@ -5,7 +5,6 @@ COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
 RUN npm run build
-
 ## Runtime stage: sirve estáticos con Nginx en el puerto 3000
 FROM nginx:1.27-alpine AS runtime
 COPY --from=builder /app/dist /usr/share/nginx/html

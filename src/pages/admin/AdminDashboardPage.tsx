@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGlobalStore } from '../../contexts/GlobalContext';
 import concesionarioService from '../../services/concesionarioService';
-import vehicleService from '../../services/vehicleService';
+
 
 interface DashboardStats {
   totalConcesionarios: number;

@@ -20,7 +20,7 @@ const Input: React.FC<InputProps> = ({
   className,
   id,
   ...props
-}) => {
+}: InputProps) => {
   const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
   
   return (

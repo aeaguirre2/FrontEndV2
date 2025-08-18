@@ -5,7 +5,7 @@ import authService from '../../services/authService';
 import type { Usuario } from '../../types/auth';
 
 const UserManagementPage: React.FC = () => {
-  const { user } = useAuth();
+
   const { addToast } = useGlobalStore();
   const [users, setUsers] = useState<Usuario[]>([]);
   const [isLoading, setIsLoading] = useState(true);

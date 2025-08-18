@@ -11,7 +11,7 @@ import Button from '../../components/ui/Button';
 import { formatCurrency } from '../../utils';
 
 const DesembolsosPage: React.FC = () => {
-  const navigate = useNavigate();
+
   const { user } = useAuth();
   const [prestamos, setPrestamos] = useState<PrestamoAprobado[]>([]);
   const [isLoading, setIsLoading] = useState(true);

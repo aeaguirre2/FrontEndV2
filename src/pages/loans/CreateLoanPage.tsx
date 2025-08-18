@@ -241,6 +241,7 @@ const CreateLoanPage: React.FC = () => {
         document.removeEventListener('keydown', handleEscapeKey);
       };
     }
+    return undefined;
   }, [modalResultadoAbierto]);
 
   // Función helper para mostrar notificaciones inline
@@ -384,7 +385,7 @@ const CreateLoanPage: React.FC = () => {
         setPrestamoSeleccionado(prestamo);
         
         // Generar array de plazos desde plazo mínimo hasta plazo máximo
-        const plazos = [];
+        const plazos: number[] = [];
         for (let i = prestamo.plazoMinimoMeses; i <= prestamo.plazoMaximoMeses; i++) {
           plazos.push(i);
         }
@@ -600,7 +601,7 @@ const CreateLoanPage: React.FC = () => {
       
     } catch (error) {
       console.error('❌ Error al cargar información del vendedor:', error);
-      setErrorVehiculos(`Error al cargar información del vendedor: ${error.message}`);
+      setErrorVehiculos(`Error al cargar información del vendedor: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     } finally {
       setLoadingVendedorInfo(false);
     }

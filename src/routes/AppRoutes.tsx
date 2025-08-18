@@ -12,7 +12,7 @@ import NotFoundPage from '../pages/NotFoundPage';
 import LoginPage from '../pages/auth/LoginPage';
 
 // Admin Pages
-import AdminDashboardPage from '../pages/admin/AdminDashboardPage';
+
 import UserManagementPage from '../pages/admin/UserManagementPage';
 
 // Vehicles

@@ -69,7 +69,7 @@ const SimulateIcon = () => (
 );
 
 // Componente de error personalizado
-const ErrorMessage: React.FC<{ message: string; onRetry: () => void; onDismiss: () => void }> = ({ message, onRetry, onDismiss }) => {
+const ErrorMessage: React.FC<{ message: string; onRetry: () => void; onDismiss: () => void }> = ({ message, onRetry, onDismiss }: { message: string; onRetry: () => void; onDismiss: () => void }) => {
   const isDateRangeError = message.includes('rango de fechas') || message.includes('31 días');
   
   return (
@@ -539,7 +539,7 @@ const LoansPage: React.FC = () => {
       
       // Generar plazos disponibles
       if (prestamoActual) {
-        const plazos = [];
+        const plazos: number[] = [];
         for (let i = prestamoActual.plazoMinimoMeses; i <= prestamoActual.plazoMaximoMeses; i++) {
           plazos.push(i);
         }

@@ -275,7 +275,7 @@ const InterestRatesPage: React.FC = () => {
           <Input
             placeholder="Buscar tasas..."
             value={filters.search}
-            onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilters(prev => ({ ...prev, search: e.target.value }))}
           />
           
           <select

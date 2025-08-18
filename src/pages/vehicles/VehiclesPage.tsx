@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import type { VehicleType, VehicleCategory } from '../../types/automotive-loan';
+
 import { getConcesionariosByEstado, getVehiculosByRuc, createVehiculo, createIdentificadorVehiculo, updateVehiculo, desactivarVehiculo, getConcesionarioByVendedorEmail } from '../../services/concesionarioService';
 import Modal from '../../components/ui/Modal';
 import IdentificadoresModal from '../concesionarios/IdentificadoresModal';
@@ -465,7 +465,7 @@ const VehiclesPage: React.FC = () => {
             <Input
               placeholder="Buscar por marca, modelo..."
               value={filters.search}
-              onChange={(e) => handleFilterChange('search', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFilterChange('search', e.target.value)}
             />
             
             <select
@@ -494,14 +494,14 @@ const VehiclesPage: React.FC = () => {
               type="number"
               placeholder="Año desde"
               value={filters.yearFrom}
-              onChange={(e) => handleFilterChange('yearFrom', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFilterChange('yearFrom', e.target.value)}
             />
 
             <Input
               type="number"
               placeholder="Año hasta"
               value={filters.yearTo}
-              onChange={(e) => handleFilterChange('yearTo', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFilterChange('yearTo', e.target.value)}
             />
 
             {user?.rol === 'ADMIN' && (
@@ -523,14 +523,14 @@ const VehiclesPage: React.FC = () => {
               type="number"
               placeholder="Precio desde"
               value={filters.priceFrom}
-              onChange={(e) => handleFilterChange('priceFrom', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFilterChange('priceFrom', e.target.value)}
             />
 
             <Input
               type="number"
               placeholder="Precio hasta"
               value={filters.priceTo}
-              onChange={(e) => handleFilterChange('priceTo', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFilterChange('priceTo', e.target.value)}
             />
 
             <Button type="submit" loading={loading}>

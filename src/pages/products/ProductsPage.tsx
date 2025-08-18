@@ -273,7 +273,7 @@ const ProductsPage: React.FC = () => {
           <Input
             placeholder="Buscar productos..."
             value={filters.search}
-            onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilters(prev => ({ ...prev, search: e.target.value }))}
           />
           
           <select

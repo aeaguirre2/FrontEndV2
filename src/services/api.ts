@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { API_CONFIG } from '../constants';
-import type { ApiResponse, ApiError } from '../types';
+import type { ApiError } from '../types';
 
 class ApiService {
   private client: AxiosInstance;

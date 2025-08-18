@@ -384,7 +384,7 @@ const ContractsPage: React.FC = () => {
           <Input
             placeholder="Buscar contratos..."
             value={filters.search}
-            onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilters(prev => ({ ...prev, search: e.target.value }))}
           />
           
           <select
@@ -404,14 +404,14 @@ const ContractsPage: React.FC = () => {
             type="date"
             placeholder="Fecha desde"
             value={filters.fechaDesde}
-            onChange={(e) => setFilters(prev => ({ ...prev, fechaDesde: e.target.value }))}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilters(prev => ({ ...prev, fechaDesde: e.target.value }))}
           />
 
           <Input
             type="date"
             placeholder="Fecha hasta"
             value={filters.fechaHasta}
-            onChange={(e) => setFilters(prev => ({ ...prev, fechaHasta: e.target.value }))}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilters(prev => ({ ...prev, fechaHasta: e.target.value }))}
           />
 
           <Button 

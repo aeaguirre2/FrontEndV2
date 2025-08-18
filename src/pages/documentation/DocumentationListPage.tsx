@@ -84,7 +84,7 @@ export default function DocumentationListPage() {
                                                 ? 'bg-green-600 text-white hover:bg-green-700' 
                                                 : 'bg-gray-400 text-gray-200 cursor-not-allowed'
                                         }`}
-                                        onClick={() => canUpload() && navigate(`/documentation/${s.numeroSolicitud}`)}
+                                        onClick={() => canUpload() && navigate(`/api/banco-frontend/documentation/${s.numeroSolicitud}`)}
                                         disabled={!canUpload()}
                                         title={!canUpload() ? 'Solo vendedores y administradores pueden cargar documentos' : ''}
                                     >
@@ -100,7 +100,7 @@ export default function DocumentationListPage() {
                                                 ? 'bg-blue-600 text-white hover:bg-blue-700' 
                                                 : 'bg-gray-400 text-gray-200 cursor-not-allowed'
                                         }`}
-                                        onClick={() => canValidate() && navigate(`/documentation/${s.numeroSolicitud}/validacion`)}
+                                        onClick={() => canValidate() && navigate(`/api/banco-frontend/documentation/${s.numeroSolicitud}/validacion`)}
                                         disabled={!canValidate()}
                                         title={!canValidate() ? 'Solo analistas y administradores pueden validar documentos' : ''}
                                     >
@@ -117,7 +117,7 @@ export default function DocumentationListPage() {
                                                 : 'bg-gray-400 text-gray-200 cursor-not-allowed'
                                         }`}
                                         onClick={() => canUpload() && navigate(
-                                            `/documentation/${s.numeroSolicitud}/contratos`
+                                            `/api/banco-frontend/documentation/${s.numeroSolicitud}/contratos`
                                         )}
                                         disabled={!canUpload()}
                                         title={!canUpload() ? 'Solo vendedores y administradores pueden cargar contratos' : ''}
@@ -135,7 +135,7 @@ export default function DocumentationListPage() {
                                                 : 'bg-gray-400 text-gray-200 cursor-not-allowed'
                                         }`}
                                         onClick={() => canValidate() && navigate(
-                                            `/documentation/${s.numeroSolicitud}/contratos/validacion`
+                                            `/api/banco-frontend/documentation/${s.numeroSolicitud}/contratos/validacion`
                                         )}
                                         disabled={!canValidate()}
                                         title={!canValidate() ? 'Solo analistas y administradores pueden validar contratos' : ''}

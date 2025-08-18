@@ -90,14 +90,14 @@ export default function DocumentationValidationPage() {
                 null,
                 { params: { usuario: 'analista' } }
             );
-            navigate('/documentation');
+            navigate('/api/banco-frontend/documentation');
         } catch (error: any) {
             console.error('Error al validar documentos:', error);
             
             // Si el error es 500, probablemente el estado ya se cambió pero falló en crear el préstamo
             if (error.response?.status === 500) {
                 alert('⚠️ La documentación se validó exitosamente, pero hubo un problema al crear el préstamo. El estado de la solicitud se actualizó correctamente. Puedes continuar con el proceso manualmente.');
-                navigate('/documentation');
+                navigate('/api/banco-frontend/documentation');
             } else {
                 alert('❌ Error al validar documentos: ' + (error.response?.data || error.message));
             }

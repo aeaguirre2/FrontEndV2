@@ -12,7 +12,7 @@ interface ProtectedRouteProps {
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   requiredRole,
-  fallbackPath = '/login',
+  fallbackPath = '/api/banco-frontend/login',
 }) => {
   const { isAuthenticated, user } = useAuth();
   const location = useLocation();

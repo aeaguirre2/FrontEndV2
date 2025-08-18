@@ -223,7 +223,7 @@ const CreateLoanPage: React.FC = () => {
     mostrarNotificacionInline('Redirigiendo a la página de solicitudes...', 'info');
     // Pequeño delay para que la animación del modal se complete antes de redirigir
     setTimeout(() => {
-      navigate('/loans');
+      navigate('/api/banco-frontend/loans');
     }, 300);
   };
 

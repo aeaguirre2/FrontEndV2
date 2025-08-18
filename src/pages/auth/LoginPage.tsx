@@ -73,9 +73,9 @@ const LoginPage: React.FC = () => {
       // Redirigir según el rol
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       if (user.rol === 'ADMIN') {
-        navigate('/admin/dashboard');
+        navigate('/api/banco-frontend/admin/dashboard');
       } else {
-        navigate('/dashboard');
+        navigate('/api/banco-frontend/dashboard');
       }
     } catch (error) {
       addToast({

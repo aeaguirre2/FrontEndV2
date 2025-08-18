@@ -9,7 +9,7 @@ interface SidebarItem {
   href: string;
   icon: string;
   children?: SidebarItem[];
-  roles?: ('ADMIN' | 'VENDEDOR')[];
+  roles?: ('ADMIN' | 'VENDEDOR' | 'ANALISTA')[];
 }
 
 const Sidebar: React.FC<{ isCollapsed: boolean; onToggle: () => void }> = ({ isCollapsed, onToggle }) => {
@@ -19,11 +19,12 @@ const Sidebar: React.FC<{ isCollapsed: boolean; onToggle: () => void }> = ({ isC
   // Definir elementos del sidebar según el rol
   const getSidebarItems = (): SidebarItem[] => {
     const isAdmin = user?.rol === 'ADMIN';
+    const isAnalista = user?.rol === 'ANALISTA';
     
     const baseItems: SidebarItem[] = [
       {
         label: 'Dashboard',
-        href: isAdmin ? '/admin/dashboard' : ROUTES.DASHBOARD,
+        href: isAdmin ? '/api/banco-frontend/admin/dashboard' : ROUTES.DASHBOARD,
         icon: '📊',
       },
     ];
@@ -34,7 +35,7 @@ const Sidebar: React.FC<{ isCollapsed: boolean; onToggle: () => void }> = ({ isC
         ...baseItems,
         {
           label: 'Gestión de Usuarios',
-          href: '/admin/users',
+          href: '/api/banco-frontend/admin/users',
           icon: '👥',
           roles: ['ADMIN'],
         },
@@ -46,7 +47,7 @@ const Sidebar: React.FC<{ isCollapsed: boolean; onToggle: () => void }> = ({ isC
         },
         {
           label: 'Vendedores',
-          href: '/vendedores',
+          href: '/api/banco-frontend/vendedores',
           icon: '👔',
           roles: ['ADMIN'],
         },
@@ -56,27 +57,6 @@ const Sidebar: React.FC<{ isCollapsed: boolean; onToggle: () => void }> = ({ isC
           icon: '🚗',
           roles: ['ADMIN'],
         },
-        {
-          label: 'Productos de Crédito',
-          href: ROUTES.PRODUCTS,
-          icon: '💳',
-          roles: ['ADMIN'],
-          children: [
-            {
-              label: 'Productos',
-              href: ROUTES.PRODUCTS,
-              icon: '📋',
-              roles: ['ADMIN'],
-            },
-            {
-              label: 'Tasas de Interés',
-              href: ROUTES.PRODUCTS_INTEREST,
-              icon: '📈',
-              roles: ['ADMIN'],
-            },
-          ],
-        },
-
         {
           label: 'Solicitudes',
           href: ROUTES.LOANS,
@@ -90,22 +70,21 @@ const Sidebar: React.FC<{ isCollapsed: boolean; onToggle: () => void }> = ({ isC
           roles: ['ADMIN'],
         },
         {
-          label: 'Contratos',
-          href: ROUTES.CONTRACTS,
-          icon: '📑',
-          roles: ['ADMIN'],
+          label: 'Documentación',
+          href: ROUTES.DOCUMENTATION,
+          icon: '📂',
+          roles: ['ADMIN', 'VENDEDOR', 'ANALISTA']
         },
+      ];
+    } else if (isAnalista) {
+      // Elementos solo para ANALISTA
+      return [
+        ...baseItems,
         {
           label: 'Documentación',
-          href: '/documentation',
+          href: ROUTES.DOCUMENTATION,
           icon: '📂',
-          roles: ['ADMIN', 'VENDEDOR']
-        },
-        {
-          label: 'Desembolsos',
-          href: ROUTES.DESEMBOLSOS,
-          icon: '💰',
-          roles: ['ADMIN'],
+          roles: ['ADMIN', 'VENDEDOR', 'ANALISTA']
         },
       ];
     } else {
@@ -132,16 +111,10 @@ const Sidebar: React.FC<{ isCollapsed: boolean; onToggle: () => void }> = ({ isC
           roles: ['VENDEDOR'],
         },
         {
-          label: 'Contratos',
-          href: ROUTES.CONTRACTS,
-          icon: '📑',
-          roles: ['VENDEDOR'],
-        },
-        {
           label: 'Documentación',
-          href: '/documentation',
+          href: ROUTES.DOCUMENTATION,
           icon: '📂',
-          roles: ['ADMIN', 'VENDEDOR']
+          roles: ['ADMIN', 'VENDEDOR', 'ANALISTA']
         },
         {
           label: 'Desembolsos',
@@ -156,7 +129,7 @@ const Sidebar: React.FC<{ isCollapsed: boolean; onToggle: () => void }> = ({ isC
   const sidebarItems = getSidebarItems();
 
   const isActive = (href: string) => {
-    if (href === ROUTES.DASHBOARD || href === '/admin/dashboard') {
+    if (href === ROUTES.DASHBOARD || href === '/api/banco-frontend/admin/dashboard') {
       return location.pathname === href;
     }
     return location.pathname.startsWith(href);

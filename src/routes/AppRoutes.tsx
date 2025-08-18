@@ -59,11 +59,11 @@ const AppRoutes: React.FC = () => {
   return (
     <Routes>
       {/* Auth Routes */}
-      <Route path="/login" element={<LoginPage />} />
+      <Route path="/api/banco-frontend/login" element={<LoginPage />} />
       
       {/* Admin Routes */}
       <Route 
-        path="/admin/dashboard" 
+        path="/api/banco-frontend/admin/dashboard" 
         element={
           <ProtectedRoute requiredRole="ADMIN">
             <AppLayout>
@@ -73,7 +73,7 @@ const AppRoutes: React.FC = () => {
         } 
       />
       <Route 
-        path="/admin/users" 
+        path="/api/banco-frontend/admin/users" 
         element={
           <ProtectedRoute requiredRole="ADMIN">
             <AppLayout>
@@ -85,7 +85,7 @@ const AppRoutes: React.FC = () => {
       
       {/* Main route - redirect to dashboard */}
       <Route 
-        path="/" 
+        path="/api/banco-frontend/" 
         element={
           <ProtectedRoute>
             <AppLayout>
@@ -95,7 +95,7 @@ const AppRoutes: React.FC = () => {
         } 
       />
       <Route 
-        path="/dashboard" 
+        path="/api/banco-frontend/dashboard" 
         element={
           <ProtectedRoute>
             <AppLayout>
@@ -107,7 +107,7 @@ const AppRoutes: React.FC = () => {
       
       {/* Vehicles */}
       <Route 
-        path="/vehicles" 
+        path="/api/banco-frontend/vehicles" 
         element={
           <ProtectedRoute>
             <AppLayout>
@@ -119,7 +119,7 @@ const AppRoutes: React.FC = () => {
       
       {/* Products */}
       <Route 
-        path="/products" 
+        path="/api/banco-frontend/products" 
         element={
           <ProtectedRoute>
             <AppLayout>
@@ -129,7 +129,7 @@ const AppRoutes: React.FC = () => {
         } 
       />
       <Route 
-        path="/products/interest" 
+        path="/api/banco-frontend/products/interest" 
         element={
           <ProtectedRoute>
             <AppLayout>
@@ -142,7 +142,7 @@ const AppRoutes: React.FC = () => {
       
       {/* Loans */}
       <Route 
-        path="/loans" 
+        path="/api/banco-frontend/loans" 
         element={
           <ProtectedRoute>
             <AppLayout>
@@ -153,7 +153,7 @@ const AppRoutes: React.FC = () => {
       />
       
       <Route 
-        path="/loans/create" 
+        path="/api/banco-frontend/loans/create" 
         element={
           <ProtectedRoute>
             <AppLayout>
@@ -164,7 +164,7 @@ const AppRoutes: React.FC = () => {
       />
       
       <Route 
-        path="/loans/simulate/:numeroSolicitud" 
+        path="/api/banco-frontend/loans/simulate/:numeroSolicitud" 
         element={
           <ProtectedRoute>
             <AppLayout>
@@ -176,7 +176,7 @@ const AppRoutes: React.FC = () => {
       
       {/* Analysis */}
       <Route 
-        path="/analysis" 
+        path="/api/banco-frontend/analysis" 
         element={
           <ProtectedRoute>
             <AppLayout>
@@ -188,7 +188,7 @@ const AppRoutes: React.FC = () => {
       
       {/* Riesgo Crediticio */}
       <Route 
-        path={ROUTES.RIESGO_CREDITO} 
+        path="/api/banco-frontend/riesgo-credito" 
         element={
           <ProtectedRoute>
             <AppLayout>
@@ -199,7 +199,7 @@ const AppRoutes: React.FC = () => {
       />
       
       <Route 
-        path={ROUTES.RIESGO_CREDITO_ADMIN} 
+        path="/api/banco-frontend/riesgo-credito/admin" 
         element={
           <ProtectedRoute requiredRole="ADMIN">
             <AppLayout>
@@ -211,7 +211,7 @@ const AppRoutes: React.FC = () => {
       
       {/* Contracts */}
       <Route 
-        path="/contracts" 
+        path="/api/banco-frontend/contracts" 
         element={
           <ProtectedRoute>
             <AppLayout>
@@ -223,7 +223,7 @@ const AppRoutes: React.FC = () => {
       
       {/* Concesionarios */}
       <Route 
-        path="/concesionarios" 
+        path="/api/banco-frontend/concesionarios" 
         element={
           <ProtectedRoute>
             <AppLayout>
@@ -235,7 +235,7 @@ const AppRoutes: React.FC = () => {
       
       {/* Vendedores */}
       <Route 
-        path="/vendedores" 
+        path="/api/banco-frontend/vendedores" 
         element={
           <ProtectedRoute>
             <AppLayout>
@@ -248,12 +248,12 @@ const AppRoutes: React.FC = () => {
       {/* Documentation */}
       {/* 1. Listado de solicitudes */}
       <Route
-        path="/documentation"
+        path="/api/banco-frontend/documentation"
         element={<ProtectedRoute><AppLayout><DocumentationListPage /></AppLayout></ProtectedRoute>}
       />
       {/* 2. Subir los 3 docs */}
       <Route
-        path="/documentation/:numeroSolicitud"
+        path="/api/banco-frontend/documentation/:numeroSolicitud"
         element={
           <ProtectedRoute>
             <AppLayout><DocumentationPage /></AppLayout>
@@ -262,7 +262,7 @@ const AppRoutes: React.FC = () => {
       />
       {/* 3. Validar los 3 docs */}
       <Route
-        path="/documentation/:numeroSolicitud/validacion"
+        path="/api/banco-frontend/documentation/:numeroSolicitud/validacion"
         element={
           <ProtectedRoute>
             <AppLayout><DocumentationValidationPage /></AppLayout>
@@ -271,7 +271,7 @@ const AppRoutes: React.FC = () => {
       />
       {/* 4. Subir contrato y pagaré */}
       <Route
-        path="/documentation/:numeroSolicitud/contratos"
+        path="/api/banco-frontend/documentation/:numeroSolicitud/contratos"
         element={
           <ProtectedRoute>
             <AppLayout><ContractUploadPage /></AppLayout>
@@ -280,7 +280,7 @@ const AppRoutes: React.FC = () => {
       />
 
       {/* 5. Validar contrato y pagaré */}
-      <Route path="/documentation/:numeroSolicitud/contratos/validacion"
+      <Route path="/api/banco-frontend/documentation/:numeroSolicitud/contratos/validacion"
         element={
           <ProtectedRoute>
             <AppLayout><ContractsValidationPage /></AppLayout>
@@ -290,7 +290,7 @@ const AppRoutes: React.FC = () => {
 
       {/* Desembolsos */}
       <Route 
-        path="/desembolsos" 
+        path="/api/banco-frontend/desembolsos" 
         element={
           <ProtectedRoute>
             <AppLayout>

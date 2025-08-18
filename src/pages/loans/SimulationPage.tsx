@@ -139,7 +139,7 @@ const SimulationPage: React.FC = () => {
             <Button onClick={cargarSimulacion} className="bg-blue-600 hover:bg-blue-700 text-white">
               Reintentar
             </Button>
-            <Button onClick={() => navigate('/loans')} variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50">
+            <Button onClick={() => navigate('/api/banco-frontend/loans')} variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50">
               Volver
             </Button>
           </div>
@@ -159,7 +159,7 @@ const SimulationPage: React.FC = () => {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
             <Button
-              onClick={() => navigate('/loans')}
+              onClick={() => navigate('/api/banco-frontend/loans')}
               variant="outline"
               className="border-gray-300 text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
             >

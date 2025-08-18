@@ -562,7 +562,7 @@ const LoansPage: React.FC = () => {
   };
 
   const handleSimularSolicitud = (numeroSolicitud: string) => {
-    navigate(`/loans/simulate/${numeroSolicitud}`);
+          navigate(`/api/banco-frontend/loans/simulate/${numeroSolicitud}`);
   };
 
   // Función para cargar información del vendedor logueado (similar a CreateLoanPage)
@@ -623,7 +623,7 @@ const LoansPage: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">Dashboard de Solicitudes</h1>
           <p className="text-gray-600 mt-1">Gestión de solicitudes de crédito automotriz</p>
         </div>
-        <Button onClick={() => navigate('/loans/create')} className="bg-black text-white hover:bg-gray-800 flex items-center space-x-2">
+        <Button onClick={() => navigate('/api/banco-frontend/loans/create')} className="bg-black text-white hover:bg-gray-800 flex items-center space-x-2">
           <PlusIcon />
           <span>Crear Solicitud</span>
         </Button>

@@ -18,7 +18,7 @@ export const MICROSERVICES = {
   FORMALIZACION: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/vehiculos',
   
   // Documentación Service (puerto 84)
-  DOCUMENTACION: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com/api/documentacion',
+  DOCUMENTACION: 'http://banquito-alb-1166574131.us-east-2.elb.amazonaws.com',
   
   // Transacciones Service (puerto 85)
   TRANSACCIONES: 'http://localhost:85',

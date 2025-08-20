@@ -240,7 +240,7 @@ const Navbar: React.FC<NavbarProps> = ({ onSidebarToggle }) => {
                 
                 {user?.rol === 'ADMIN' && (
                   <Link
-                    to="/admin/users"
+                    to="/api/banco-frontend/admin/users"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     onClick={() => setShowUserMenu(false)}
                   >

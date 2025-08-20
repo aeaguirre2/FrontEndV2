@@ -11,9 +11,11 @@ import {
 import type { DocumentoDTO } from '../../services/documentService';
 
 import { Eye, Check, X } from 'lucide-react';
+import { MICROSERVICES } from '../../constants';
+
 
 // <-- URL base de tu MS Documentación
-const API = import.meta.env.VITE_DOCUMENT_SERVICE_URL || 'http://localhost:84';
+const API = MICROSERVICES.DOCUMENTACION; 
 console.log("💥 DocumentService API base →", API);
 
 
@@ -42,7 +44,7 @@ export default function DocumentationValidationPage() {
         if (!numeroSolicitud) return;
         // traemos el PDF como blob
         const res = await axios.get(
-            `${API}/api/documentacion/v1/solicitudes/${numeroSolicitud}/documentos/${id}/ver`,
+            `${API}/v1/solicitudes/${numeroSolicitud}/documentos/${id}/ver`,
             { responseType: 'blob' }
         );
         // creamos un objectURL
@@ -86,7 +88,7 @@ export default function DocumentationValidationPage() {
     const handleValidateAll = async () => {
         try {
             await axios.patch(
-                `${API}/api/documentacion/v1/solicitudes/${numeroSolicitud}/documentos/validar-todos`,
+                `${API}/v1/solicitudes/${numeroSolicitud}/documentos/validar-todos`,
                 null,
                 { params: { usuario: 'analista' } }
             );

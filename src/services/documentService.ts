@@ -23,7 +23,7 @@ export interface DocumentoDTO {
 // 1. Listar documentos
 export function listDocuments(numeroSolicitud: string) {
   return axios.get<DocumentoDTO[]>(
-    `${API}/api/documentacion/v1/solicitudes/${numeroSolicitud}/documentos`
+    `${API}/v1/solicitudes/${numeroSolicitud}/documentos`
   );
 }
 
@@ -37,7 +37,7 @@ export function uploadDocument(
   form.append('archivo', file);
   form.append('tipoDocumento', tipoDocumento);
   return axios.post<DocumentoDTO>(
-    `${API}/api/documentacion/v1/solicitudes/${numeroSolicitud}/documentos`,
+    `${API}/v1/solicitudes/${numeroSolicitud}/documentos`,
     form,
     { headers: { 'Content-Type': 'multipart/form-data' } }
   );
@@ -46,14 +46,14 @@ export function uploadDocument(
 // 3. Validar un documento
 export function validateDocument(numeroSolicitud: string, id: string) {
   return axios.patch<DocumentoDTO>(
-    `${API}/api/documentacion/v1/solicitudes/${numeroSolicitud}/documentos/${id}/validar`
+    `${API}/v1/solicitudes/${numeroSolicitud}/documentos/${id}/validar`
   );
 }
 
 // 4. Rechazar un documento
 export function rejectDocument(numeroSolicitud: string, id: string, observacion: string) {
   return axios.patch<DocumentoDTO>(
-    `${API}/api/documentacion/v1/solicitudes/${numeroSolicitud}/documentos/${id}/rechazar`,
+    `${API}/v1/solicitudes/${numeroSolicitud}/documentos/${id}/rechazar`,
     { observacion }
   );
 }
@@ -64,7 +64,7 @@ export function notifyContractLoaded(
   usuario: string
 ): Promise<AxiosResponse<void>> {
   return axios.patch(
-    `${API}/api/documentacion/v1/solicitudes/${numeroSolicitud}/documentos/contratos-cargados`,
+    `${API}/v1/solicitudes/${numeroSolicitud}/documentos/contratos-cargados`,
     null,
     { params: { usuario } }
   );
@@ -73,10 +73,18 @@ export function notifyContractLoaded(
 // src/services/documentService.ts
 export function validateAllContracts(numeroSolicitud: string, usuario: string) {
   return axios.patch(
-    `${API}/api/documentacion/v1/solicitudes/${numeroSolicitud}/documentos/validar-contratos`,
+    `${API}/v1/solicitudes/${numeroSolicitud}/documentos/validar-contratos`,
     null,
     { params: { usuario } }
   );
 }
 
 
+export function previewDocument(ns: string, id: string) {
+  return axios.get(`${API}/v1/solicitudes/${ns}/documentos/${id}/ver`, { responseType: 'blob' });
+}
+
+
+export function validateAll(ns: string, usuario: string) {
+  return axios.patch(`${API}/v1/solicitudes/${ns}/documentos/validar-todos`, null, { params: { usuario } });
+}

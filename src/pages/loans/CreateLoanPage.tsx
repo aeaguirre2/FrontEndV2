@@ -157,6 +157,29 @@ const CreateLoanPage: React.FC = () => {
       maximumFractionDigits: 0,
     }).format(amount);
   };
+
+  // Función para validar si la calificación permite continuar con la solicitud
+  const esCalificacionValida = (calificacion: string): boolean => {
+    if (!calificacion) return false;
+    
+    const calificacionUpper = calificacion.toUpperCase();
+    
+    // Calificaciones válidas: A+, A, A-, B+, B, B-
+    const calificacionesValidas = ['A+', 'A', 'A-', 'B+', 'B', 'B-'];
+    
+    return calificacionesValidas.includes(calificacionUpper);
+  };
+
+  // Función para obtener el mensaje de calificación
+  const getMensajeCalificacion = (calificacion: string): string => {
+    if (!calificacion) return '';
+    
+    if (esCalificacionValida(calificacion)) {
+      return '✅ Calificación válida para solicitar crédito';
+    } else {
+      return '❌ Calificación insuficiente para solicitar crédito (mínimo B-)';
+    }
+  };
   const [formData, setFormData] = useState({
     cedula: '0101515151',
     nombres: '',
@@ -945,6 +968,29 @@ const CreateLoanPage: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Validación de Calificación */}
+                <div className={`rounded-lg p-4 mb-4 ${
+                  esCalificacionValida(riesgoCrediticio.calificacionRiesgo) 
+                    ? 'bg-green-50 border border-green-200' 
+                    : 'bg-red-50 border border-red-200'
+                }`}>
+                  <h4 className="font-medium text-gray-800 mb-2">Validación de Calificación</h4>
+                  <div className="text-sm">
+                    <p className={`font-medium ${
+                      esCalificacionValida(riesgoCrediticio.calificacionRiesgo) 
+                        ? 'text-green-700' 
+                        : 'text-red-700'
+                    }`}>
+                      {getMensajeCalificacion(riesgoCrediticio.calificacionRiesgo)}
+                    </p>
+                    {!esCalificacionValida(riesgoCrediticio.calificacionRiesgo) && (
+                      <p className="text-xs text-red-600 mt-1">
+                        Solo se permiten solicitudes para clientes con calificación B- o superior.
+                      </p>
+                    )}
+                  </div>
+                </div>
+
                 {/* Información del Cliente */}
                 <div className="bg-gray-50 rounded-lg p-4">
                   <h4 className="font-medium text-gray-800 mb-2">Información del Cliente</h4>
@@ -965,17 +1011,18 @@ const CreateLoanPage: React.FC = () => {
 
           </div>
 
-          {/* Tipo de Crédito */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center mb-4">
-              <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
-                <DocumentIcon />
+          {/* Tipo de Crédito - Solo mostrar si calificación es válida */}
+          {riesgoCrediticio && esCalificacionValida(riesgoCrediticio.calificacionRiesgo) && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center mb-4">
+                <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                  <DocumentIcon />
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900">Tipo de Crédito</h2>
+                  <p className="text-sm text-gray-500">Seleccione el tipo de préstamo</p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">Tipo de Crédito</h2>
-                <p className="text-sm text-gray-500">Seleccione el tipo de préstamo</p>
-              </div>
-            </div>
 
             {loadingPrestamos && (
               <div className="text-center py-4">
@@ -1062,8 +1109,11 @@ const CreateLoanPage: React.FC = () => {
             )}
           </div>
 
-          {/* Información del Vehículo */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          )}
+
+          {/* Información del Vehículo - Solo mostrar si calificación es válida */}
+          {riesgoCrediticio && esCalificacionValida(riesgoCrediticio.calificacionRiesgo) && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center mb-4">
               <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-3">
                 <CarIcon />
@@ -1413,8 +1463,11 @@ const CreateLoanPage: React.FC = () => {
             )}
           </div>
 
-          {/* Cálculo del Crédito */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          )}
+
+          {/* Cálculo del Crédito - Solo mostrar si calificación es válida */}
+          {riesgoCrediticio && esCalificacionValida(riesgoCrediticio.calificacionRiesgo) && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center mb-4">
               <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
                 <CalculatorIcon />
@@ -1695,8 +1748,36 @@ const CreateLoanPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Botón de acción */}
-          <div className="text-center">
+          )}
+
+          {/* Mensaje cuando la calificación no es válida */}
+          {riesgoCrediticio && !esCalificacionValida(riesgoCrediticio.calificacionRiesgo) && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-8 text-center">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-red-800 mb-2">
+                No se puede continuar con la solicitud
+              </h3>
+              <p className="text-red-700 mb-4">
+                La calificación crediticia del cliente ({riesgoCrediticio.calificacionRiesgo}) no cumple con los requisitos mínimos para solicitar un crédito.
+              </p>
+              <div className="bg-white rounded-lg p-4 border border-red-200">
+                <h4 className="font-medium text-gray-900 mb-2">Requisitos de Calificación:</h4>
+                <ul className="text-sm text-gray-700 space-y-1">
+                  <li>• Calificación mínima requerida: <strong>B-</strong></li>
+                  <li>• Calificaciones válidas: A+, A, A-, B+, B, B-</li>
+                  <li>• Calificación actual: <strong className="text-red-600">{riesgoCrediticio.calificacionRiesgo}</strong></li>
+                </ul>
+              </div>
+            </div>
+          )}
+
+          {/* Botón de acción - Solo mostrar si calificación es válida */}
+          {riesgoCrediticio && esCalificacionValida(riesgoCrediticio.calificacionRiesgo) && (
+            <div className="text-center">
             <Button
               type="submit"
               disabled={!validarCamposRequeridos() || !validarCapacidadPago() || !validarMontoSolicitado() || !prestamoSeleccionado || creandoSolicitud}
@@ -1732,6 +1813,7 @@ const CreateLoanPage: React.FC = () => {
               </p>
             )}
           </div>
+          )}
         </form>
 
         {/* Modal de Resultado */}
